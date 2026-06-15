@@ -2,81 +2,45 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Blackwater Police - Login</title>
+<title>Blackwater - Login</title>
 <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
 <div class="binder-container">
-    <div class="old-paper-sheet">
+<div class="old-paper-sheet">
 
-        <h1>REGISTRE OFFICIEL</h1>
-        <h2>ACCÈS AGENT</h2>
+<h1>REGISTRE BLACKWATER</h1>
 
-        <!-- INSCRIPTION -->
-        <h3>INSCRIPTION</h3>
-        <input id="regNom" placeholder="Nom">
-        <input id="regPrenom" placeholder="Prénom">
-        <input id="regGrade" placeholder="Grade">
-        <input id="regCode" placeholder="Code cadenas">
-        <button id="btnRegister">Créer dossier agent</button>
+<h2>INSCRIPTION</h2>
+<input id="regNom" placeholder="Nom">
+<input id="regPrenom" placeholder="Prénom">
+<input id="regGrade" placeholder="Grade">
+<input id="regCode" placeholder="Code cadenas">
+<button id="btnRegister">Créer agent</button>
 
-        <hr>
+<hr>
 
-        <!-- CONNEXION -->
-        <h3>CONNEXION</h3>
-        <input id="logNom" placeholder="Nom">
-        <input id="logPrenom" placeholder="Prénom">
-        <input id="logCode" placeholder="Code cadenas">
-        <button id="btnLogin">Accéder au registre</button>
+<h2>CONNEXION</h2>
+<input id="logNom" placeholder="Nom">
+<input id="logPrenom" placeholder="Prénom">
+<input id="logCode" placeholder="Code cadenas">
+<button id="btnLogin">Entrer</button>
 
-    </div>
+</div>
 </div>
 
-<!-- ================= FIREBASE ================= -->
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-import {
-    getFirestore,
-    doc,
-    setDoc,
-    getDoc
-} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+import { db, doc, setDoc, getDoc } from "./firebase.js";
 
-const firebaseConfig = {
-    apiKey: "TON_API_KEY",
-    authDomain: "police-bw.firebaseapp.com",
-    projectId: "police-bw",
-    storageBucket: "police-bw.appspot.com",
-    messagingSenderId: "606303723293",
-    appId: "1:606303723293:web:2df34f7a461d42d1580bf4"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-// rendu global (IMPORTANT)
-window.db = db;
-window.doc = doc;
-window.setDoc = setDoc;
-window.getDoc = getDoc;
-</script>
-
-<!-- ================= LOGIC ================= -->
-<script type="module">
-const db = window.db;
-const doc = window.doc;
-const setDoc = window.setDoc;
-const getDoc = window.getDoc;
-
-// ================= INSCRIPTION =================
+// INSCRIPTION
 document.getElementById("btnRegister").addEventListener("click", async () => {
 
-    const nom = document.getElementById("regNom").value.trim().toLowerCase();
-    const prenom = document.getElementById("regPrenom").value.trim().toLowerCase();
-    const grade = document.getElementById("regGrade").value.trim();
-    const code = document.getElementById("regCode").value.trim();
+    const nom = regNom.value.trim().toLowerCase();
+    const prenom = regPrenom.value.trim().toLowerCase();
+    const grade = regGrade.value.trim();
+    const code = regCode.value.trim();
 
     if (!nom || !prenom || !code) {
         return alert("Champs incomplets");
@@ -91,28 +55,23 @@ document.getElementById("btnRegister").addEventListener("click", async () => {
         code
     });
 
-    alert("Agent enregistré");
+    alert("Agent créé");
 });
 
-// ================= LOGIN =================
+// LOGIN
 document.getElementById("btnLogin").addEventListener("click", async () => {
 
-    const nom = document.getElementById("logNom").value.trim().toLowerCase();
-    const prenom = document.getElementById("logPrenom").value.trim().toLowerCase();
-    const code = document.getElementById("logCode").value.trim();
+    const nom = logNom.value.trim().toLowerCase();
+    const prenom = logPrenom.value.trim().toLowerCase();
+    const code = logCode.value.trim();
 
     const id = `${prenom}_${nom}`;
-
     const ref = doc(db, "agents", id);
     const snap = await getDoc(ref);
 
-    if (!snap.exists()) {
-        return alert("Agent inconnu");
-    }
+    if (!snap.exists()) return alert("Agent inconnu");
 
-    if (snap.data().code !== code) {
-        return alert("Code incorrect");
-    }
+    if (snap.data().code !== code) return alert("Code incorrect");
 
     localStorage.setItem("agent", JSON.stringify(snap.data()));
 
