@@ -20,37 +20,46 @@
         <section class="form-section">
             <h3>IDENTITÉ OFFICIER</h3>
 
-            <input type="text" id="agentNom" placeholder="Nom">
-            <input type="text" id="agentPrenom" placeholder="Prénom">
-            <input type="text" id="agentGrade" placeholder="Grade">
-            <input type="password" id="agentCadena" placeholder="Code cadenas (4 chiffres)">
+            <div class="row">
+                <input type="text" id="agentNom" placeholder="Nom">
+                <input type="text" id="agentPrenom" placeholder="Prénom">
+            </div>
+
+            <div class="row">
+                <input type="text" id="agentGrade" placeholder="Grade">
+                <input type="password" id="agentCadena" placeholder="Code cadenas (4 chiffres)">
+            </div>
         </section>
 
         <!-- AJOUT -->
         <section class="form-section">
             <h3>AJOUT DE STOCK</h3>
 
-            <input type="text" id="platNom" placeholder="Nom du produit">
-            <input type="number" id="platQuantite" placeholder="Quantité">
+            <div class="row">
+                <input type="text" id="platNom" placeholder="Nom du produit">
+                <input type="number" id="platQuantite" placeholder="Quantité">
+            </div>
 
-            <button id="btnAjouter">Ajouter au registre</button>
+            <button id="btnAjouter" class="btn">Ajouter au registre</button>
         </section>
 
         <!-- RETRAIT -->
         <section class="form-section">
             <h3>RETRAIT DE STOCK</h3>
 
-            <input type="text" id="retraitPlatNom" placeholder="Nom du produit">
-            <input type="number" id="retraitQuantite" placeholder="Quantité">
+            <div class="row">
+                <input type="text" id="retraitPlatNom" placeholder="Nom du produit">
+                <input type="number" id="retraitQuantite" placeholder="Quantité">
+            </div>
 
-            <button id="btnRetirer">Retirer du registre</button>
+            <button id="btnRetirer" class="btn btn-danger">Retirer du registre</button>
         </section>
 
         <!-- INVENTAIRE -->
         <section class="form-section">
             <h3>INVENTAIRE</h3>
 
-            <table border="1">
+            <table class="inventory-table">
                 <thead>
                     <tr>
                         <th>Produit</th>
@@ -91,7 +100,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// export global
 window.dbInstance = db;
 
 window.firestoreTools = {
@@ -105,12 +113,10 @@ window.firestoreTools = {
 };
 </script>
 
-<!-- TON JS -->
 <script src="app.js" defer></script>
 
 </body>
 </html>
-
 
 
 
