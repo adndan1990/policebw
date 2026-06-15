@@ -18,7 +18,6 @@
             <div class="stamps">CONFIDENTIEL</div>
         </header>
 
-        <!-- Section I -->
         <section class="form-section">
             <h3>I. AUTHENTIFICATION DE L'OFFICIER</h3>
             <div class="input-group row">
@@ -29,22 +28,22 @@
                 <input type="text" id="agentGrade" placeholder="Grade (ex: Adjoint, Sergent)" required>
                 <input type="password" id="agentCadena" placeholder="Code Cadenas Secret (4 chiffres)" maxlength="4" required>
             </div>
-            <div style="text-align: right; margin-top: 10px;">
-                <button type="button" class="btn" id="btnInscrireAgent" style="background: #4a3525;">[ S'inscrire au Registre ]</button>
+            <div style="text-align:right; margin-top:10px;">
+                <button type="button" class="btn" id="btnInscrireAgent" style="background:#4a3525;">
+                    [ S'inscrire au Registre ]
+                </button>
             </div>
         </section>
 
-        <!-- Section II -->
         <section class="form-section">
             <h3>II. ENTRÉE DE MARCHANDISES (Ravitaillement)</h3>
             <div class="input-group row">
-                <input type="text" id="platNom" placeholder="Nom du plat / ration (ex: Haricots en conserve)">
+                <input type="text" id="platNom" placeholder="Nom du plat / ration">
                 <input type="number" id="platQuantite" placeholder="Quantité ajoutée" min="1">
                 <button type="button" class="btn" id="btnAjouter">Inscrire l'Arrivée</button>
             </div>
         </section>
 
-        <!-- Section III -->
         <section class="form-section">
             <h3>III. SORTIE DE STOCK (Rations Consommées)</h3>
             <div class="input-group row">
@@ -54,7 +53,6 @@
             </div>
         </section>
 
-        <!-- Section IV -->
         <section class="form-section">
             <h3>IV. INVENTAIRE ACTUEL DU CLASSEUR</h3>
             <table class="inventory-table">
@@ -69,7 +67,6 @@
             </table>
         </section>
 
-        <!-- Section V -->
         <section class="form-section">
             <h3>V. REGISTRE DES OFFICIERS RECONNUS</h3>
             <table class="inventory-table">
@@ -87,32 +84,53 @@
     </div>
 </div>
 
-<!-- INJECTION DIRECTE DES CONFIGURATIONS SANS PASSER PAR DES IMPORTS SCRIPT EXTÉRIEURS -->
+<!-- Firebase -->
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-</script>
-  import { getFirestore, doc, setDoc, getDoc, updateDoc, deleteDoc, collection, onSnapshot } from "https://gstatic.com";
 
-  const firebaseConfig = {
+import {
+    getFirestore,
+    doc,
+    setDoc,
+    getDoc,
+    updateDoc,
+    deleteDoc,
+    collection,
+    onSnapshot
+} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+
+const firebaseConfig = {
     apiKey: "AIzaSyCTZFFQ1BbNS2AhY2My3FoxE3iMF2VrRso",
-    authDomain: "://firebaseapp.com",
+    authDomain: "police-bw.firebaseapp.com",
     projectId: "police-bw",
     storageBucket: "police-bw.firebasestorage.app",
     messagingSenderId: "606303723293",
     appId: "1:606303723293:web:2df34f7a461d42d1580bf4",
     measurementId: "G-20HRYJBSP0"
-  };
+};
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-  // Rendre la base accessible par notre fichier app.js principal
-  window.dbInstance = db;
-  window.firestoreTools = { doc, setDoc, getDoc, updateDoc, deleteDoc, collection, onSnapshot };
+window.dbInstance = db;
+
+window.firestoreTools = {
+    doc,
+    setDoc,
+    getDoc,
+    updateDoc,
+    deleteDoc,
+    collection,
+    onSnapshot
+};
+
+console.log("Firebase chargé correctement");
+console.log(window.firestoreTools);
+
 </script>
 
-<!-- Lancement de votre code logique -->
+<!-- Ton code -->
 <script src="app.js" defer></script>
 
 </body>
