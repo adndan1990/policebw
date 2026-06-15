@@ -1,4 +1,3 @@
-
 window.addEventListener('DOMContentLoaded', () => {
 
     if (!window.dbInstance || !window.firestoreTools) {
@@ -17,92 +16,85 @@ window.addEventListener('DOMContentLoaded', () => {
         onSnapshot
     } = window.firestoreTools;
 
-    let currentAgent = null;
-
     // =========================
-    // INSCRIPTION AGENT
+    // AGENT CONNECTÉ (SESSION)
     // =========================
-    document.getElementById('btnRegister').addEventListener('click', async () => {
+    let agentActif = null;
 
-        const nom = document.getElementById('newNom').value.trim().toUpperCase();
-        const prenom = document.getElementById('newPrenom').value.trim();
-        const grade = document.getElementById('newGrade').value.trim();
-        const code = document.getElementById('newCode').value.trim();
+    const agentSelect = document.getElementById("agentSelect");
+    const loginStatus = document.getElementById("loginStatus");
 
-        if (!nom || !prenom || !grade || !code) {
-            alert("Champs incomplets");
-            return;
-        }
-
-        const id = `${prenom.toLowerCase()}_${nom.toLowerCase()}`;
-
-        await setDoc(doc(db, "agents_blackwater", id), {
-            nom,
-            prenom,
-            grade,
-            code
-        });
-
-        alert("Agent enregistré");
-    });
+    const codeInput = document.getElementById("agentCadena");
 
     // =========================
     // CHARGER LISTE AGENTS
     // =========================
-    onSnapshot(collection(db, "agents_blackwater"), (snapshot) => {
+    function chargerAgents() {
+        onSnapshot(collection(db, "agents_blackwater"), (snapshot) => {
 
-        const select = document.getElementById('agentSelect');
-        select.innerHTML = "";
+            agentSelect.innerHTML = `<option value="">-- Sélectionner un agent --</option>`;
 
-        snapshot.forEach((d) => {
-            const a = d.data();
+            snapshot.forEach((d) => {
+                const a = d.data();
 
-            const option = document.createElement("option");
-            option.value = d.id;
-            option.textContent = `${a.prenom} ${a.nom} (${a.grade})`;
+                const option = document.createElement("option");
+                option.value = d.id;
+                option.textContent = `${a.prenom} ${a.nom} (${a.grade})`;
 
-            select.appendChild(option);
+                agentSelect.appendChild(option);
+            });
         });
-    });
+    }
+
+    chargerAgents();
 
     // =========================
     // LOGIN AGENT
     // =========================
-    document.getElementById('btnLogin').addEventListener('click', async () => {
+    document.getElementById("btnLogin").addEventListener("click", async () => {
 
-        const id = document.getElementById('agentSelect').value;
-        const code = document.getElementById('loginCode').value.trim();
+        const agentId = agentSelect.value;
+        const code = codeInput.value.trim();
 
-        if (!id || !code) return;
+        if (!agentId || !code) {
+            loginStatus.textContent = "Sélection + code requis.";
+            loginStatus.style.color = "red";
+            return;
+        }
 
-        const ref = doc(db, "agents_blackwater", id);
+        const ref = doc(db, "agents_blackwater", agentId);
         const snap = await getDoc(ref);
 
         if (!snap.exists()) {
-            alert("Agent inexistant");
+            loginStatus.textContent = "Agent inconnu.";
+            loginStatus.style.color = "red";
             return;
         }
 
-        if (snap.data().code !== code) {
-            alert("Code incorrect");
+        const data = snap.data();
+
+        if (data.code !== code) {
+            loginStatus.textContent = "Code incorrect.";
+            loginStatus.style.color = "red";
             return;
         }
 
-        currentAgent = {
-            id,
-            ...snap.data()
+        agentActif = {
+            id: agentId,
+            ...data,
+            signature: `${data.grade} ${data.prenom} ${data.nom}`
         };
 
-        document.getElementById('loginStatus').innerText =
-            `Connecté: ${currentAgent.prenom} ${currentAgent.nom}`;
+        loginStatus.textContent = `Connecté : ${agentActif.signature}`;
+        loginStatus.style.color = "green";
     });
 
     // =========================
-    // VERIFICATION SIMPLE
+    // CHECK LOGIN
     // =========================
     function requireLogin() {
-        if (!currentAgent) {
-            alert("Connectez-vous d'abord en tant qu'agent");
+        if (!agentActif) {
+            alert("Vous devez être connecté en tant qu'agent.");
             return false;
         }
         return true;
@@ -129,9 +121,10 @@ window.addEventListener('DOMContentLoaded', () => {
         await setDoc(ref, {
             nom,
             quantite: total,
-            dernierAgent: `${currentAgent.grade} ${currentAgent.prenom} ${currentAgent.nom}`,
+            dernierAgent: agentActif.signature,
             derniereAction: "Ajout"
         });
+
     });
 
     // =========================
@@ -151,32 +144,37 @@ window.addEventListener('DOMContentLoaded', () => {
 
         if (!snap.exists()) return;
 
-        let newQty = snap.data().quantite - qty;
+        let current = snap.data().quantite;
+        let newQty = current - qty;
 
-        if (newQty <= 0) {
+        if (newQty < 0) return;
+
+        if (newQty === 0) {
             await deleteDoc(ref);
-        } else {
-            await setDoc(ref, {
-                nom,
-                quantite: newQty,
-                dernierAgent: `${currentAgent.grade} ${currentAgent.prenom} ${currentAgent.nom}`,
-                derniereAction: `Retrait (-${qty})`
-            });
+            return;
         }
+
+        await setDoc(ref, {
+            nom,
+            quantite: newQty,
+            dernierAgent: agentActif.signature,
+            derniereAction: `Retrait (-${qty})`
+        });
+
     });
 
     // =========================
-    // INVENTAIRE LIVE
+    // LIVE INVENTAIRE
     // =========================
     onSnapshot(collection(db, "inventaire_blackwater"), (snapshot) => {
 
         const tbody = document.getElementById('inventoryBody');
-        tbody.innerHTML = "";
+        tbody.innerHTML = '';
 
         snapshot.forEach((d) => {
             const data = d.data();
 
-            const tr = document.createElement("tr");
+            const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td>${data.nom}</td>
                 <td>${data.quantite}</td>
@@ -185,9 +183,9 @@ window.addEventListener('DOMContentLoaded', () => {
 
             tbody.appendChild(tr);
         });
+
     });
 
 });
-
 
 
