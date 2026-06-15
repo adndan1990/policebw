@@ -5,26 +5,25 @@
 <title>Stock Blackwater</title>
 <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
 <div class="binder-container">
 <div class="old-paper-sheet">
 
-<h1>REGISTRE STOCK</h1>
+<h1>STOCK BLACKWATER</h1>
 
 <h3 id="agentInfo"></h3>
 
-<!-- AJOUT -->
+<h3>AJOUT</h3>
 <input id="platNom" placeholder="Produit">
 <input id="platQuantite" type="number" placeholder="Quantité">
-<button id="btnAjouter">Ajouter</button>
+<button id="btnAjouter" class="btn">Ajouter</button>
 
-<hr>
-
-<!-- RETRAIT -->
-<input id="retraitNom" placeholder="Produit">
+<h3>RETRAIT</h3>
+<input id="retraitPlatNom" placeholder="Produit">
 <input id="retraitQuantite" type="number" placeholder="Quantité">
-<button id="btnRetirer">Retirer</button>
+<button id="btnRetirer" class="btn btn-danger">Retirer</button>
 
 <hr>
 
@@ -33,7 +32,7 @@
 <tr>
 <th>Produit</th>
 <th>Quantité</th>
-<th>Action</th>
+<th>Dernière action</th>
 </tr>
 </thead>
 <tbody id="inventoryBody"></tbody>
@@ -42,7 +41,108 @@
 </div>
 </div>
 
-<script type="module" src="./app.js"></script>
+<script type="module">
+import {
+  db,
+  doc,
+  setDoc,
+  getDoc,
+  deleteDoc,
+  collection,
+  onSnapshot
+} from "./firebase.js";
+
+// SESSION
+const agent = JSON.parse(localStorage.getItem("agent"));
+
+if (!agent) {
+    window.location.href = "login.html";
+}
+
+document.getElementById("agentInfo").innerText =
+`${agent.grade} ${agent.prenom} ${agent.nom}`;
+
+// CHECK CODE
+async function checkCode() {
+    const id = `${agent.prenom}_${agent.nom}`;
+    const ref = doc(db, "agents", id);
+    const snap = await getDoc(ref);
+
+    return snap.exists() && snap.data().code === agent.code;
+}
+
+// AJOUT
+document.getElementById("btnAjouter").addEventListener("click", async () => {
+
+    if (!await checkCode()) return alert("Code invalide");
+
+    const nom = platNom.value.trim().toLowerCase();
+    const qty = parseInt(platQuantite.value);
+
+    if (!nom || isNaN(qty)) return;
+
+    const ref = doc(db, "stock", nom);
+    const snap = await getDoc(ref);
+
+    let total = qty;
+    if (snap.exists()) total += snap.data().quantite;
+
+    await setDoc(ref, {
+        nom,
+        quantite: total,
+        last: `${agent.prenom} ${agent.nom}`,
+        action: "Ajout"
+    });
+});
+
+// RETRAIT
+document.getElementById("btnRetirer").addEventListener("click", async () => {
+
+    if (!await checkCode()) return alert("Code invalide");
+
+    const nom = retraitPlatNom.value.trim().toLowerCase();
+    const qty = parseInt(retraitQuantite.value);
+
+    if (!nom || isNaN(qty)) return;
+
+    const ref = doc(db, "stock", nom);
+    const snap = await getDoc(ref);
+
+    if (!snap.exists()) return;
+
+    let newQty = snap.data().quantite - qty;
+
+    if (newQty <= 0) {
+        await deleteDoc(ref);
+    } else {
+        await setDoc(ref, {
+            nom,
+            quantite: newQty,
+            last: `${agent.prenom} ${agent.nom}`,
+            action: `Retrait (-${qty})`
+        });
+    }
+});
+
+// LIVE TABLE
+onSnapshot(collection(db, "stock"), (snap) => {
+
+    const body = document.getElementById("inventoryBody");
+    body.innerHTML = "";
+
+    snap.forEach(d => {
+        const data = d.data();
+
+        body.innerHTML += `
+            <tr>
+                <td>${data.nom}</td>
+                <td>${data.quantite}</td>
+                <td>${data.last || ""} ${data.action ? "(" + data.action + ")" : ""}</td>
+            </tr>
+        `;
+    });
+});
+</script>
 
 </body>
 </html>
