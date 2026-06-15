@@ -12,7 +12,6 @@ window.addEventListener('DOMContentLoaded', () => {
         doc,
         setDoc,
         getDoc,
-        updateDoc,
         deleteDoc,
         collection,
         onSnapshot
