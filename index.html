@@ -5,22 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Police de Blackwater - Registre des Stocks</title>
     <link rel="stylesheet" href="style.css">
+
+    <!-- CHARGEMENT DE FIREBASE AVANT LE SCRIPT (Liens complets officiels de Google) -->
+    <script src="https://gstatic.com"></script>
+    <script src="https://gstatic.com"></script>
 </head>
 <body>
 
 <div class="binder-container">
-    <!-- Cadenas Visuel -->
     <div class="padlock-seal">🔒 PROPRIÉTÉ DU SHÉRIF</div>
 
     <div class="old-paper-sheet">
-        <!-- En-tête Officiel 1900 -->
         <header class="police-header">
             <h1>BLACKWATER POLICE DEPARTMENT</h1>
             <h2>REGISTRE OFFICIEL DES SUBSISTANCES — ANNÉE 1900</h2>
             <div class="stamps">CONFIDENTIEL</div>
         </header>
 
-        <!-- Section I : Authentification Agent -->
+        <!-- Section I -->
         <section class="form-section">
             <h3>I. AUTHENTIFICATION DE L'OFFICIER</h3>
             <div class="input-group row">
@@ -36,7 +38,7 @@
             </div>
         </section>
 
-        <!-- Section II : Ajout de Nourriture -->
+        <!-- Section II -->
         <section class="form-section">
             <h3>II. ENTRÉE DE MARCHANDISES (Ravitaillement)</h3>
             <div class="input-group row">
@@ -46,7 +48,7 @@
             </div>
         </section>
 
-        <!-- Section III : Retrait de Nourriture -->
+        <!-- Section III -->
         <section class="form-section">
             <h3>III. SORTIE DE STOCK (Rations Consommées)</h3>
             <div class="input-group row">
@@ -56,7 +58,7 @@
             </div>
         </section>
 
-        <!-- Section IV : Visualisation de l'Inventaire Actuel -->
+        <!-- Section IV -->
         <section class="form-section">
             <h3>IV. INVENTAIRE ACTUEL DU CLASSEUR</h3>
             <table class="inventory-table">
@@ -67,13 +69,11 @@
                         <th>Dernière Action Par</th>
                     </tr>
                 </thead>
-                <tbody id="inventoryBody">
-                    <!-- Rempli par JavaScript -->
-                </tbody>
+                <tbody id="inventoryBody"></tbody>
             </table>
         </section>
 
-        <!-- Section V : Registre des Agents inscrits et validation -->
+        <!-- Section V -->
         <section class="form-section">
             <h3>V. REGISTRE DES OFFICIERS RECONNUS</h3>
             <table class="inventory-table">
@@ -85,18 +85,17 @@
                         <th>Décision du Shérif / Actions</th>
                     </tr>
                 </thead>
-                <tbody id="agentsBody">
-                    <!-- Rempli par JavaScript -->
-                </tbody>
+                <tbody id="agentsBody"></tbody>
             </table>
         </section>
     </div>
 </div>
 
-<!-- Script Principal -->
-<script type="module" src="app.js"></script>
+<!-- LE SCRIPT CLASSIQUE SANS MODULE -->
+<script src="app.js"></script>
 
 </body>
 </html>
+
 
 
