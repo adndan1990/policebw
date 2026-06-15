@@ -16,74 +16,94 @@ window.addEventListener('DOMContentLoaded', () => {
         onSnapshot
     } = window.firestoreTools;
 
-    // =========================
-    // SESSION / SECURITE
-    // =========================
-    let failedAttempts = 0;
-    let sessionAgent = null;
-
-    function logTentative(agentId, status) {
-        console.log(`[LOG] ${agentId} -> ${status}`);
-    }
+    let currentAgent = null;
 
     // =========================
-    // AGENT DATA
+    // INSCRIPTION AGENT
     // =========================
-    const getAgentData = () => {
-        const nom = document.getElementById('agentNom').value.trim().toUpperCase();
-        const prenom = document.getElementById('agentPrenom').value.trim();
-        const grade = document.getElementById('agentGrade').value.trim();
-        const code = document.getElementById('agentCadena').value.trim();
+    document.getElementById('btnRegister').addEventListener('click', async () => {
 
-        if (!nom || !prenom || !grade || !code) return null;
+        const nom = document.getElementById('newNom').value.trim().toUpperCase();
+        const prenom = document.getElementById('newPrenom').value.trim();
+        const grade = document.getElementById('newGrade').value.trim();
+        const code = document.getElementById('newCode').value.trim();
 
-        return {
-            id: `${prenom.toLowerCase()}_${nom.toLowerCase()}`,
+        if (!nom || !prenom || !grade || !code) {
+            alert("Champs incomplets");
+            return;
+        }
+
+        const id = `${prenom.toLowerCase()}_${nom.toLowerCase()}`;
+
+        await setDoc(doc(db, "agents_blackwater", id), {
             nom,
             prenom,
             grade,
-            code,
-            signature: `${grade} ${prenom} ${nom}`
-        };
-    };
+            code
+        });
+
+        alert("Agent enregistré");
+    });
 
     // =========================
-    // VERIFICATION AGENT
+    // CHARGER LISTE AGENTS
     // =========================
-    async function verifierAgent(agent) {
+    onSnapshot(collection(db, "agents_blackwater"), (snapshot) => {
 
-        if (failedAttempts >= 3) {
-            alert("ACCÈS BLOQUÉ (3 tentatives échouées). Contactez le Shérif.");
-            return false;
-        }
+        const select = document.getElementById('agentSelect');
+        select.innerHTML = "";
 
-        if (!agent || !agent.id || !agent.code) {
-            alert("Agent invalide.");
-            return false;
-        }
+        snapshot.forEach((d) => {
+            const a = d.data();
 
-        const ref = doc(db, "agents_blackwater", agent.id);
+            const option = document.createElement("option");
+            option.value = d.id;
+            option.textContent = `${a.prenom} ${a.nom} (${a.grade})`;
+
+            select.appendChild(option);
+        });
+    });
+
+    // =========================
+    // LOGIN AGENT
+    // =========================
+    document.getElementById('btnLogin').addEventListener('click', async () => {
+
+        const id = document.getElementById('agentSelect').value;
+        const code = document.getElementById('loginCode').value.trim();
+
+        if (!id || !code) return;
+
+        const ref = doc(db, "agents_blackwater", id);
         const snap = await getDoc(ref);
 
         if (!snap.exists()) {
-            failedAttempts++;
-            logTentative(agent.id, "AGENT INCONNU");
-            alert("Agent non enregistré.");
-            return false;
+            alert("Agent inexistant");
+            return;
         }
 
-        const data = snap.data();
-
-        if (String(data.code).trim() !== String(agent.code).trim()) {
-            failedAttempts++;
-            logTentative(agent.id, "CODE INCORRECT");
-            alert(`Code incorrect (${failedAttempts}/3).`);
-            return false;
+        if (snap.data().code !== code) {
+            alert("Code incorrect");
+            return;
         }
 
-        sessionAgent = agent;
-        failedAttempts = 0;
-        logTentative(agent.id, "ACCES AUTORISÉ");
+        currentAgent = {
+            id,
+            ...snap.data()
+        };
+
+        document.getElementById('loginStatus').innerText =
+            `Connecté: ${currentAgent.prenom} ${currentAgent.nom}`;
+    });
+
+    // =========================
+    // VERIFICATION SIMPLE
+    // =========================
+    function requireLogin() {
+        if (!currentAgent) {
+            alert("Connectez-vous d'abord en tant qu'agent");
+            return false;
+        }
         return true;
     }
 
@@ -92,11 +112,7 @@ window.addEventListener('DOMContentLoaded', () => {
     // =========================
     document.getElementById('btnAjouter').addEventListener('click', async () => {
 
-        const agent = getAgentData();
-        if (!agent) return;
-
-        const ok = await verifierAgent(agent);
-        if (!ok) return;
+        if (!requireLogin()) return;
 
         const nom = document.getElementById('platNom').value.trim().toLowerCase();
         const qty = parseInt(document.getElementById('platQuantite').value);
@@ -112,7 +128,7 @@ window.addEventListener('DOMContentLoaded', () => {
         await setDoc(ref, {
             nom,
             quantite: total,
-            dernierAgent: agent.signature,
+            dernierAgent: `${currentAgent.grade} ${currentAgent.prenom} ${currentAgent.nom}`,
             derniereAction: "Ajout"
         });
     });
@@ -122,11 +138,7 @@ window.addEventListener('DOMContentLoaded', () => {
     // =========================
     document.getElementById('btnRetirer').addEventListener('click', async () => {
 
-        const agent = getAgentData();
-        if (!agent) return;
-
-        const ok = await verifierAgent(agent);
-        if (!ok) return;
+        if (!requireLogin()) return;
 
         const nom = document.getElementById('retraitPlatNom').value.trim().toLowerCase();
         const qty = parseInt(document.getElementById('retraitQuantite').value);
@@ -138,18 +150,15 @@ window.addEventListener('DOMContentLoaded', () => {
 
         if (!snap.exists()) return;
 
-        let current = snap.data().quantite;
-        let newQty = current - qty;
+        let newQty = snap.data().quantite - qty;
 
-        if (newQty < 0) return;
-
-        if (newQty === 0) {
+        if (newQty <= 0) {
             await deleteDoc(ref);
         } else {
             await setDoc(ref, {
                 nom,
                 quantite: newQty,
-                dernierAgent: agent.signature,
+                dernierAgent: `${currentAgent.grade} ${currentAgent.prenom} ${currentAgent.nom}`,
                 derniereAction: `Retrait (-${qty})`
             });
         }
@@ -161,12 +170,12 @@ window.addEventListener('DOMContentLoaded', () => {
     onSnapshot(collection(db, "inventaire_blackwater"), (snapshot) => {
 
         const tbody = document.getElementById('inventoryBody');
-        tbody.innerHTML = '';
+        tbody.innerHTML = "";
 
         snapshot.forEach((d) => {
             const data = d.data();
 
-            const tr = document.createElement('tr');
+            const tr = document.createElement("tr");
             tr.innerHTML = `
                 <td>${data.nom}</td>
                 <td>${data.quantite}</td>
