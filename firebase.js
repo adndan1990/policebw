@@ -4,14 +4,13 @@ getFirestore,
 doc,
 setDoc,
 getDoc,
-updateDoc,
 deleteDoc,
 collection,
 onSnapshot
 } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
 const firebaseConfig = {
-apiKey: "TON_KEY",
+apiKey: "TON_API_KEY",
 authDomain: "police-bw.firebaseapp.com",
 projectId: "police-bw",
 storageBucket: "police-bw.appspot.com",
@@ -27,7 +26,6 @@ db,
 doc,
 setDoc,
 getDoc,
-updateDoc,
 deleteDoc,
 collection,
 onSnapshot
