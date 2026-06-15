@@ -113,7 +113,7 @@ window.addEventListener('DOMContentLoaded', () => {
             tbody.appendChild(tr);
         });
 
-    });
+
 
 
 
