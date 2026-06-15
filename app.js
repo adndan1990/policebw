@@ -17,6 +17,9 @@ window.addEventListener('DOMContentLoaded', () => {
         onSnapshot
     } = window.firestoreTools;
 
+    // =========================
+    // AGENT DATA
+    // =========================
     const getAgentData = () => {
         const nom = document.getElementById('agentNom').value.trim().toUpperCase();
         const prenom = document.getElementById('agentPrenom').value.trim();
@@ -35,10 +38,37 @@ window.addEventListener('DOMContentLoaded', () => {
         };
     };
 
+    // =========================
+    // VERIFICATION CADENA
+    // =========================
+    async function verifierAgent(agent) {
+
+        const ref = doc(db, "agents_blackwater", agent.id);
+        const snap = await getDoc(ref);
+
+        if (!snap.exists()) {
+            alert("Agent non enregistré. Accès refusé.");
+            return false;
+        }
+
+        if (snap.data().code !== agent.code) {
+            alert("Code cadenas incorrect. Accès refusé.");
+            return false;
+        }
+
+        return true;
+    }
+
+    // =========================
+    // AJOUT STOCK
+    // =========================
     document.getElementById('btnAjouter').addEventListener('click', async () => {
 
         const agent = getAgentData();
         if (!agent) return;
+
+        const ok = await verifierAgent(agent);
+        if (!ok) return;
 
         const nom = document.getElementById('platNom').value.trim().toLowerCase();
         const qty = parseInt(document.getElementById('platQuantite').value);
@@ -57,13 +87,18 @@ window.addEventListener('DOMContentLoaded', () => {
             dernierAgent: agent.signature,
             derniereAction: "Ajout"
         });
-
     });
 
+    // =========================
+    // RETRAIT STOCK
+    // =========================
     document.getElementById('btnRetirer').addEventListener('click', async () => {
 
         const agent = getAgentData();
         if (!agent) return;
+
+        const ok = await verifierAgent(agent);
+        if (!ok) return;
 
         const nom = document.getElementById('retraitPlatNom').value.trim().toLowerCase();
         const qty = parseInt(document.getElementById('retraitQuantite').value);
@@ -90,9 +125,11 @@ window.addEventListener('DOMContentLoaded', () => {
                 derniereAction: `Retrait (-${qty})`
             });
         }
-
     });
 
+    // =========================
+    // INVENTAIRE LIVE
+    // =========================
     onSnapshot(collection(db, "inventaire_blackwater"), (snapshot) => {
 
         const tbody = document.getElementById('inventoryBody');
