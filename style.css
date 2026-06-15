@@ -1,26 +1,32 @@
-/* Ambiance Générale Bureau du Shérif */
+/* =========================
+   AMBIANCE GÉNÉRALE
+========================= */
+
 body {
     background-color: #2b1e17;
     background-image: radial-gradient(#4a3525 20%, transparent 80%);
-    font-family: 'Courier New', Courier, monospace; /* Style machine à écrire */
+    font-family: "Courier New", Courier, monospace;
     color: #2b2013;
     padding: 40px 20px;
     margin: 0;
 }
 
-/* Le Classeur avec Cadenas */
+/* =========================
+   CLASSEUR / DOSSIER POLICE
+========================= */
+
 .binder-container {
     max-width: 850px;
     margin: 0 auto;
-    background: #5a3d28; /* Bordure du classeur en cuir */
-    padding: 25px 15px 15px 40px; /* Effet reliure à gauche */
+    background: #5a3d28;
+    padding: 25px 15px 15px 40px;
     border-radius: 8px;
     box-shadow: 0 15px 35px rgba(0,0,0,0.7);
     position: relative;
     border-left: 20px solid #3d281a;
 }
 
-/* Badge Cadenas */
+/* Cadenas / sceau */
 .padlock-seal {
     position: absolute;
     top: 15px;
@@ -35,18 +41,24 @@ body {
     box-shadow: 3px 3px 10px rgba(0,0,0,0.5);
 }
 
-/* La Feuille de Papier Jaunie */
+/* =========================
+   FEUILLE REGISTRE
+========================= */
+
 .old-paper-sheet {
     background-color: #f4ebd0;
     background-image: linear-gradient(rgba(0,0,0,0.03) 1px, transparent 1px);
-    background-size: 100% 24px; /* Lignes d'écriture style cahier */
+    background-size: 100% 24px;
     padding: 40px;
     min-height: 1000px;
     box-shadow: inset 0 0 40px rgba(139,115,85,0.5), 2px 2px 10px rgba(0,0,0,0.3);
     border: 1px solid #d3c29d;
 }
 
-/* En-tête Police Blackwater */
+/* =========================
+   EN-TÊTE OFFICIEL
+========================= */
+
 .police-header {
     text-align: center;
     border-bottom: 3px double #2b2013;
@@ -81,12 +93,16 @@ body {
     font-size: 0.9rem;
 }
 
-/* Sections du Formulaire */
+/* =========================
+   SECTIONS FORMULAIRE
+========================= */
+
 .form-section {
     margin-bottom: 35px;
-    background: rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.25);
     padding: 15px;
     border: 1px solid rgba(0,0,0,0.1);
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
 }
 
 .form-section h3 {
@@ -94,9 +110,13 @@ body {
     font-size: 1rem;
     border-bottom: 1px solid #2b2013;
     padding-bottom: 5px;
+    letter-spacing: 1px;
 }
 
-/* Champs de saisie Machine à écrire */
+/* =========================
+   FORMULAIRES (STYLE 1900)
+========================= */
+
 .row {
     display: flex;
     gap: 15px;
@@ -104,11 +124,12 @@ body {
     flex-wrap: wrap;
 }
 
+/* Inputs type registre ancien */
 input {
     background: transparent;
     border: none;
     border-bottom: 1px solid #55412c;
-    font-family: 'Courier New', Courier, monospace;
+    font-family: "Courier New", Courier, monospace;
     font-size: 1.05rem;
     padding: 6px;
     color: #1a120b;
@@ -119,16 +140,19 @@ input {
 input:focus {
     outline: none;
     border-bottom: 2px solid #8a1f1f;
-    background: rgba(255,255,255,0.5);
+    background: rgba(255,255,255,0.4);
 }
 
-/* Boutons Rétro */
+/* =========================
+   BOUTONS STYLE OFFICIEL
+========================= */
+
 .btn {
     background: #3d2c1f;
     color: #f4ebd0;
     border: 1px solid #231912;
     padding: 8px 20px;
-    font-family: 'Courier New', Courier, monospace;
+    font-family: "Courier New", Courier, monospace;
     cursor: pointer;
     font-weight: bold;
     transition: 0.2s;
@@ -146,14 +170,19 @@ input:focus {
     background: #8f2525;
 }
 
-/* Table de l'inventaire */
+/* =========================
+   TABLE REGISTRE
+========================= */
+
 .inventory-table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 15px;
+    font-size: 0.95rem;
 }
 
-.inventory-table th, .inventory-table td {
+.inventory-table th,
+.inventory-table td {
     border: 1px solid #55412c;
     padding: 10px;
     text-align: left;
@@ -161,53 +190,66 @@ input:focus {
 
 .inventory-table th {
     background: rgba(0,0,0,0.05);
+    letter-spacing: 1px;
 }
 
-/* Statuts d'inscription des Agents */
+/* =========================
+   STATUT AGENTS
+========================= */
+
 .status-badge {
     padding: 3px 8px;
     font-weight: bold;
     font-size: 0.85rem;
     border: 1px dashed;
 }
+
 .status-badge.attente {
     color: #b58925;
     border-color: #b58925;
 }
+
 .status-badge.valide {
     color: #2b6e1a;
     border-color: #2b6e1a;
     background: rgba(43, 110, 26, 0.1);
 }
 
-/* Bouton d'approbation style tampon officiel du Shérif */
+/* =========================
+   BOUTONS ADMIN
+========================= */
+
 .btn-approve {
     background: #2b6e1a;
-    color: #fff;
+    color: white;
     border: 1px solid #143d0b;
     padding: 4px 10px;
-    font-family: 'Courier New', Courier, monospace;
+    font-family: "Courier New", Courier, monospace;
     font-size: 0.8rem;
     cursor: pointer;
-    margin-right: 5px;
 }
+
 .btn-approve:hover {
     background: #3e9c27;
 }
 
-/* Bouton Supprimer/Rayer du registre */
 .btn-delete {
     background: #7a1c1c;
-    color: #fff;
+    color: white;
     border: 1px solid #4a1010;
     padding: 4px 10px;
-    font-family: 'Courier New', Courier, monospace;
+    font-family: "Courier New", Courier, monospace;
     font-size: 0.8rem;
     cursor: pointer;
 }
+
 .btn-delete:hover {
     background: #b82828;
 }
+
+/* =========================
+   ACTIONS TABLE
+========================= */
 
 .action-buttons-cell {
     display: flex;
