@@ -1,8 +1,8 @@
 // ==========================================
-// 1. IMPORTATIONS DES MODULES FIREBASE CORRIGÉS
+// 1. IMPORTATIONS DES MODULES FIREBASE (LIENS FORCÉS JSDELIVR)
 // ==========================================
-import { initializeApp } from "https://gstatic.com";
-import { getFirestore, doc, setDoc, getDoc, updateDoc, deleteDoc, collection, onSnapshot } from "https://gstatic.com";
+import { initializeApp } from "https://jsdelivr.net";
+import { getFirestore, doc, setDoc, getDoc, updateDoc, deleteDoc, collection, onSnapshot } from "https://jsdelivr.net";
 
 // ==========================================
 // 2. CONFIGURATION DE VOTRE BASE DE DONNÉES CORRIGÉE
@@ -20,6 +20,7 @@ const firebaseConfig = {
 // INITIALISATION UNIQUE
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+
 
 
 // ==========================================
