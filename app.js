@@ -1,3 +1,4 @@
+
 window.addEventListener('DOMContentLoaded', () => {
 
     if (!window.dbInstance || !window.firestoreTools) {
@@ -17,9 +18,6 @@ window.addEventListener('DOMContentLoaded', () => {
         onSnapshot
     } = window.firestoreTools;
 
-    // =========================
-    // AGENT
-    // =========================
     const getAgentData = () => {
         const nom = document.getElementById('agentNom').value.trim().toUpperCase();
         const prenom = document.getElementById('agentPrenom').value.trim();
@@ -38,9 +36,6 @@ window.addEventListener('DOMContentLoaded', () => {
         };
     };
 
-    // =========================
-    // AJOUT
-    // =========================
     document.getElementById('btnAjouter').addEventListener('click', async () => {
 
         const agent = getAgentData();
@@ -66,9 +61,6 @@ window.addEventListener('DOMContentLoaded', () => {
 
     });
 
-    // =========================
-    // RETRAIT
-    // =========================
     document.getElementById('btnRetirer').addEventListener('click', async () => {
 
         const agent = getAgentData();
@@ -103,9 +95,6 @@ window.addEventListener('DOMContentLoaded', () => {
 
     });
 
-    // =========================
-    // INVENTAIRE LIVE
-    // =========================
     onSnapshot(collection(db, "inventaire_blackwater"), (snapshot) => {
 
         const tbody = document.getElementById('inventoryBody');
@@ -123,8 +112,8 @@ window.addEventListener('DOMContentLoaded', () => {
 
             tbody.appendChild(tr);
         });
+
     });
 
 });
-
 
