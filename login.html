@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Connexion Agent</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="binder-container">
+<div class="old-paper-sheet">
+
+<h2>CONNEXION OFFICIER</h2>
+
+<input id="idAgent" placeholder="ID agent (prenom_nom)">
+<input id="code" type="password" placeholder="Code cadenas">
+
+<button class="btn" id="loginBtn">Entrer au registre</button>
+
+<p id="status"></p>
+
+</div>
+</div>
+
+<script type="module">
+import { db, doc, getDoc } from "./firebase.js";
+
+document.getElementById("loginBtn").addEventListener("click", async () => {
+
+    const id = document.getElementById("idAgent").value;
+    const code = document.getElementById("code").value;
+
+    const ref = doc(db, "agents_blackwater", id);
+    const snap = await getDoc(ref);
+
+    if (!snap.exists()) {
+        document.getElementById("status").innerText = "Agent inconnu";
+        return;
+    }
+
+    if (snap.data().code !== code) {
+        document.getElementById("status").innerText = "Code incorrect";
+        return;
+    }
+
+    if (!snap.data().approuve) {
+        document.getElementById("status").innerText = "Pas encore validé";
+        return;
+    }
+
+    localStorage.setItem("agent", JSON.stringify(snap.data()));
+
+    window.location.href = "stock.html";
+});
+
+</script>
+
+</body>
+</html>

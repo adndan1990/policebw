@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Inscription Agent</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="binder-container">
+<div class="old-paper-sheet">
+
+<h2>ENREGISTREMENT OFFICIER</h2>
+
+<input id="nom" placeholder="Nom">
+<input id="prenom" placeholder="Prénom">
+<input id="grade" placeholder="Grade">
+<input id="code" type="password" placeholder="Code cadenas">
+
+<button class="btn" id="registerBtn">Créer dossier</button>
+
+</div>
+</div>
+
+<script type="module">
+import { db, setDoc, doc } from "./firebase.js";
+
+document.getElementById("registerBtn").addEventListener("click", async () => {
+
+    const nom = document.getElementById("nom").value;
+    const prenom = document.getElementById("prenom").value;
+    const grade = document.getElementById("grade").value;
+    const code = document.getElementById("code").value;
+
+    if (!nom || !prenom || !grade || !code) return;
+
+    const id = prenom.toLowerCase() + "_" + nom.toLowerCase();
+
+    await setDoc(doc(db, "agents_blackwater", id), {
+        nom,
+        prenom,
+        grade,
+        code,
+        approuve: false
+    });
+
+    alert("Dossier créé. Attente validation du shérif.");
+    window.location.href = "login.html";
+});
+
+</script>
+
+</body>
+</html>
