@@ -1,15 +1,9 @@
 // ==========================================
-// 1. IMPORTATIONS DES MODULES FIREBASE (LIENS FORCÉS JSDELIVR)
-// ==========================================
-import { initializeApp } from "https://jsdelivr.net";
-import { getFirestore, doc, setDoc, getDoc, updateDoc, deleteDoc, collection, onSnapshot } from "https://jsdelivr.net";
-
-// ==========================================
-// 2. CONFIGURATION DE VOTRE BASE DE DONNÉES CORRIGÉE
+// CONFIGURATION DE VOTRE BASE DE DONNÉES (Version Compat)
 // ==========================================
 const firebaseConfig = {
   apiKey: "AIzaSyCTZFFQ1BbNS2AhY2My3FoxE3iMF2VrRso",
-  authDomain: "police-bw.firebaseapp.com",
+  authDomain: "://firebaseapp.com",
   projectId: "police-bw",
   storageBucket: "police-bw.firebasestorage.app",
   messagingSenderId: "606303723293",
@@ -17,19 +11,14 @@ const firebaseConfig = {
   measurementId: "G-20HRYJBSP0"
 };
 
-// INITIALISATION UNIQUE
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-
+// INITIALISATION SANS IMPORTATION DANGEREUSE
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 
 // ==========================================
-// 3. LOGIQUE ET FONCTIONS DE L'APPLICATION
+// LOGIQUE ET FONCTIONS DE L'APPLICATION
 // ==========================================
 
-/**
- * Récupère et valide les données de l'agent depuis le formulaire
- */
 const getAgentData = () => {
     const nom = document.getElementById('agentNom').value.trim().toUpperCase();
     const prenom = document.getElementById('agentPrenom').value.trim();
@@ -52,21 +41,18 @@ const getAgentData = () => {
     };
 };
 
-/**
- * Contrôle ou bloque un agent existant si son code secret est erroné
- */
 async function EnregistrerOuVerifierAgent(agent) {
-    const agentRef = doc(db, "agents_blackwater", agent.id);
-    const agentSnap = await getDoc(agentRef);
+    const agentRef = db.collection("agents_blackwater").doc(agent.id);
+    const agentSnap = await agentRef.get();
 
-    if (agentSnap.exists()) {
+    if (agentSnap.exists) {
         if (agentSnap.data().code !== agent.code) {
             alert("Accès refusé ! Le code de cadenas ne correspond pas à cet officier.");
             return { valide: false, approuve: false };
         }
         return { valide: true, approuve: agentSnap.data().approuve };
     } else {
-        await setDoc(agentRef, {
+        await agentRef.set({
             nom: agent.nom,
             prenom: agent.prenom,
             grade: agent.grade,
@@ -78,22 +64,20 @@ async function EnregistrerOuVerifierAgent(agent) {
     }
 }
 
-// ==========================================
 // BOUTON : INSCRIPTION MANUELLE DE L'AGENT
-// ==========================================
 document.getElementById('btnInscrireAgent').addEventListener('click', async () => {
     const agent = getAgentData();
     if (!agent) return;
 
-    const agentRef = doc(db, "agents_blackwater", agent.id);
-    const agentSnap = await getDoc(agentRef);
+    const agentRef = db.collection("agents_blackwater").doc(agent.id);
+    const agentSnap = await agentRef.get();
 
-    if (agentSnap.exists()) {
+    if (agentSnap.exists) {
         alert("Cet officier figure déjà dans les archives du classeur !");
         return;
     }
 
-    await setDoc(agentRef, {
+    await agentRef.set({
         nom: agent.nom,
         prenom: agent.prenom,
         grade: agent.grade,
@@ -104,9 +88,7 @@ document.getElementById('btnInscrireAgent').addEventListener('click', async () =
     alert(`Demande d'inscription déposée. Le Shérif doit maintenant tamponner votre ligne en bas de page.`);
 });
 
-// ==========================================
 // ACTION : ENTRÉE DE MARCHANDISES
-// ==========================================
 document.getElementById('btnAjouter').addEventListener('click', async () => {
     const agent = getAgentData();
     if (!agent) return;
@@ -122,15 +104,15 @@ document.getElementById('btnAjouter').addEventListener('click', async () => {
         return;
     }
 
-    const docRef = doc(db, "inventaire_blackwater", nomPlat);
-    const docSnap = await getDoc(docRef);
+    const docRef = db.collection("inventaire_blackwater").doc(nomPlat);
+    const docSnap = await docRef.get();
 
     let nouvelleQuantite = quantiteAjoutee;
-    if (docSnap.exists()) {
+    if (docSnap.exists) {
         nouvelleQuantite += docSnap.data().quantite;
     }
 
-    await setDoc(docRef, {
+    await docRef.set({
         nom: nomPlat,
         quantite: nouvelleQuantite,
         dernierAgent: agent.signature,
@@ -142,17 +124,15 @@ document.getElementById('btnAjouter').addEventListener('click', async () => {
     alert(`Ravitaillement consigné avec succès.`);
 });
 
-// ==========================================
 // ACTION : SORTIE DE MARCHANDISES
-// ==========================================
 document.getElementById('btnRetirer').addEventListener('click', async () => {
     const agent = getAgentData();
     if (!agent) return;
 
-    const agentRef = doc(db, "agents_blackwater", agent.id);
-    const agentSnap = await getDoc(agentRef);
+    const agentRef = db.collection("agents_blackwater").doc(agent.id);
+    const agentSnap = await agentRef.get();
 
-    if (!agentSnap.exists()) {
+    if (!agentSnap.exists) {
         alert(`Retrait refusé ! L'officier n'est pas répertorié. Inscrivez-vous d'abord.`);
         return;
     }
@@ -175,10 +155,10 @@ document.getElementById('btnRetirer').addEventListener('click', async () => {
         return;
     }
 
-    const docRef = doc(db, "inventaire_blackwater", nomPlat);
-    const docSnap = await getDoc(docRef);
+    const docRef = db.collection("inventaire_blackwater").doc(nomPlat);
+    const docSnap = await docRef.get();
 
-    if (!docSnap.exists()) {
+    if (!docSnap.exists) {
         alert("Ce plat n'est pas répertorié dans les stocks.");
         return;
     }
@@ -189,7 +169,7 @@ document.getElementById('btnRetirer').addEventListener('click', async () => {
         return;
     }
 
-    await setDoc(docRef, {
+    await docRef.set({
         nom: nomPlat,
         quantite: quantiteActuelle - quantiteRetiree,
         dernierAgent: agent.signature,
@@ -201,10 +181,8 @@ document.getElementById('btnRetirer').addEventListener('click', async () => {
     alert("Le retrait a été validé.");
 });
 
-// ==========================================
 // FLUX TEMPS RÉEL : TABLEAU DE L'INVENTAIRE
-// ==========================================
-onSnapshot(collection(db, "inventaire_blackwater"), (snapshot) => {
+db.collection("inventaire_blackwater").onSnapshot((snapshot) => {
     const tbody = document.getElementById('inventoryBody');
     tbody.innerHTML = ''; 
     snapshot.forEach((doc) => {
@@ -219,10 +197,8 @@ onSnapshot(collection(db, "inventaire_blackwater"), (snapshot) => {
     });
 });
 
-// ==========================================
 // FLUX TEMPS RÉEL : REGISTRE ET ACTIONS DES AGENTS
-// ==========================================
-onSnapshot(collection(db, "agents_blackwater"), (snapshot) => {
+db.collection("agents_blackwater").onSnapshot((snapshot) => {
     const tbody = document.getElementById('agentsBody');
     tbody.innerHTML = '';
 
@@ -256,8 +232,7 @@ onSnapshot(collection(db, "agents_blackwater"), (snapshot) => {
     document.querySelectorAll('.btn-approve').forEach(button => {
         button.addEventListener('click', async (e) => {
             const idAgentAValider = e.target.getAttribute('data-id');
-            const agentRef = doc(db, "agents_blackwater", idAgentAValider);
-            await updateDoc(agentRef, { approuve: true });
+            await db.collection("agents_blackwater").doc(idAgentAValider).update({ approuve: true });
             alert("Inscription officialisée !");
         });
     });
@@ -267,11 +242,11 @@ onSnapshot(collection(db, "agents_blackwater"), (snapshot) => {
         button.addEventListener('click', async (e) => {
             const idAgentASupprimer = e.target.getAttribute('data-id');
             if (confirm("Rayer définitivement cet officier ?")) {
-                const agentRef = doc(db, "agents_blackwater", idAgentASupprimer);
-                await deleteDoc(agentRef);
+                await db.collection("agents_blackwater").doc(idAgentASupprimer).delete();
                 alert("L'agent a été retiré du registre.");
             }
         });
     });
 });
+
 
