@@ -4,6 +4,7 @@
 import { initializeApp } from "https://gstatic.com";
 import { getFirestore, doc, setDoc, getDoc, updateDoc, deleteDoc, collection, onSnapshot } from "https://gstatic.com";
 
+
 // ==========================================
 // 2. CONFIGURATION DE VOTRE BASE DE DONNÉES
 // ==========================================
