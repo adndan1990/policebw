@@ -1,26 +1,14 @@
-// ==========================================
-// CONFIGURATION DE VOTRE BASE DE DONNÉES
-// ==========================================
-const firebaseConfig = {
-  apiKey: "AIzaSyCTZFFQ1BbNS2AhY2My3FoxE3iMF2VrRso",
-  authDomain: "://firebaseapp.com",
-  projectId: "police-bw",
-  storageBucket: "police-bw.firebasestorage.app",
-  messagingSenderId: "606303723293",
-  appId: "1:606303723293:web:2df34f7a461d42d1580bf4",
-  measurementId: "G-20HRYJBSP0"
-};
+// On attend que la page internet et l'injection Firebase soient prêtes
+window.addEventListener('DOMContentLoaded', () => {
+    
+    // Récupération des outils injectés par index.html
+    const db = window.dbInstance;
+    const { doc, setDoc, getDoc, updateDoc, deleteDoc, collection, onSnapshot } = window.firestoreTools;
 
-// SÉCURITÉ DE CHARGEMENT : On attend que index.html ait totalement fini de télécharger Firebase
-window.onload = function() {
-
-    // INITIALISATION SÉCURISÉE
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-
-    // ==========================================
-    // LOGIQUE ET FONCTIONS DE L'APPLICATION
-    // ==========================================
+    if (!db) {
+        console.error("Le registre n'a pas pu se connecter aux archives secrètes.");
+        return;
+    }
 
     const getAgentData = () => {
         const nom = document.getElementById('agentNom').value.trim().toUpperCase();
@@ -45,17 +33,17 @@ window.onload = function() {
     };
 
     async function EnregistrerOuVerifierAgent(agent) {
-        const agentRef = db.collection("agents_blackwater").doc(agent.id);
-        const agentSnap = await agentRef.get();
+        const agentRef = doc(db, "agents_blackwater", agent.id);
+        const agentSnap = await getDoc(agentRef);
 
-        if (agentSnap.exists) {
+        if (agentSnap.exists()) {
             if (agentSnap.data().code !== agent.code) {
                 alert("Accès refusé ! Le code de cadenas ne correspond pas à cet officier.");
                 return { valide: false, approuve: false };
             }
             return { valide: true, approuve: agentSnap.data().approuve };
         } else {
-            await agentRef.set({
+            await setDoc(agentRef, {
                 nom: agent.nom,
                 prenom: agent.prenom,
                 grade: agent.grade,
@@ -72,15 +60,15 @@ window.onload = function() {
         const agent = getAgentData();
         if (!agent) return;
 
-        const agentRef = db.collection("agents_blackwater").doc(agent.id);
-        const agentSnap = await agentRef.get();
+        const agentRef = doc(db, "agents_blackwater", agent.id);
+        const agentSnap = await getDoc(agentRef);
 
-        if (agentSnap.exists) {
+        if (agentSnap.exists()) {
             alert("Cet officier figure déjà dans les archives du classeur !");
             return;
         }
 
-        await agentRef.set({
+        await setDoc(agentRef, {
             nom: agent.nom,
             prenom: agent.prenom,
             grade: agent.grade,
@@ -107,15 +95,15 @@ window.onload = function() {
             return;
         }
 
-        const docRef = db.collection("inventaire_blackwater").doc(nomPlat);
-        const docSnap = await docRef.get();
+        const docRef = doc(db, "inventaire_blackwater", nomPlat);
+        const docSnap = await getDoc(docRef);
 
         let nouvelleQuantite = quantiteAjoutee;
-        if (docSnap.exists) {
+        if (docSnap.exists()) {
             nouvelleQuantite += docSnap.data().quantite;
         }
 
-        await docRef.set({
+        await setDoc(docRef, {
             nom: nomPlat,
             quantite: nouvelleQuantite,
             dernierAgent: agent.signature,
@@ -132,10 +120,10 @@ window.onload = function() {
         const agent = getAgentData();
         if (!agent) return;
 
-        const agentRef = db.collection("agents_blackwater").doc(agent.id);
-        const agentSnap = await agentRef.get();
+        const agentRef = doc(db, "agents_blackwater", agent.id);
+        const agentSnap = await getDoc(agentRef);
 
-        if (!agentSnap.exists) {
+        if (!agentSnap.exists()) {
             alert(`Retrait refusé ! L'officier n'est pas répertorié. Inscrivez-vous d'abord.`);
             return;
         }
@@ -158,10 +146,10 @@ window.onload = function() {
             return;
         }
 
-        const docRef = db.collection("inventaire_blackwater").doc(nomPlat);
-        const docSnap = await docRef.get();
+        const docRef = doc(db, "inventaire_blackwater", nomPlat);
+        const docSnap = await getDoc(docRef);
 
-        if (!docSnap.exists) {
+        if (!docSnap.exists()) {
             alert("Ce plat n'est pas répertorié dans les stocks.");
             return;
         }
@@ -172,7 +160,7 @@ window.onload = function() {
             return;
         }
 
-        await docRef.set({
+        await setDoc(docRef, {
             nom: nomPlat,
             quantite: quantiteActuelle - quantiteRetiree,
             dernierAgent: agent.signature,
@@ -185,7 +173,7 @@ window.onload = function() {
     });
 
     // FLUX TEMPS RÉEL : TABLEAU DE L'INVENTAIRE
-    db.collection("inventaire_blackwater").onSnapshot((snapshot) => {
+    onSnapshot(collection(db, "inventaire_blackwater"), (snapshot) => {
         const tbody = document.getElementById('inventoryBody');
         tbody.innerHTML = ''; 
         snapshot.forEach((doc) => {
@@ -201,7 +189,7 @@ window.onload = function() {
     });
 
     // FLUX TEMPS RÉEL : REGISTRE ET ACTIONS DES AGENTS
-    db.collection("agents_blackwater").onSnapshot((snapshot) => {
+    onSnapshot(collection(db, "agents_blackwater"), (snapshot) => {
         const tbody = document.getElementById('agentsBody');
         tbody.innerHTML = '';
 
@@ -235,7 +223,8 @@ window.onload = function() {
         document.querySelectorAll('.btn-approve').forEach(button => {
             button.addEventListener('click', async (e) => {
                 const idAgentAValider = e.target.getAttribute('data-id');
-                await db.collection("agents_blackwater").doc(idAgentAValider).update({ approuve: true });
+                const agentRef = doc(db, "agents_blackwater", idAgentAValider);
+                await updateDoc(agentRef, { approuve: true });
                 alert("Inscription officialisée !");
             });
         });
@@ -245,13 +234,14 @@ window.onload = function() {
             button.addEventListener('click', async (e) => {
                 const idAgentASupprimer = e.target.getAttribute('data-id');
                 if (confirm("Rayer définitivement cet officier ?")) {
-                    await db.collection("agents_blackwater").doc(idAgentASupprimer).delete();
+                    const agentRef = doc(db, "agents_blackwater", idAgentASupprimer);
+                    await deleteDoc(agentRef);
                     alert("L'agent a été retiré du registre.");
                 }
             });
         });
     });
-};
+});
 
 
 
