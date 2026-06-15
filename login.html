@@ -2,57 +2,60 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Connexion Agent</title>
+<title>Login</title>
 <link rel="stylesheet" href="style.css">
 </head>
-<body>
 
+<body>
 <div class="binder-container">
 <div class="old-paper-sheet">
 
-<h2>CONNEXION OFFICIER</h2>
+<h1>CONNEXION OFFICIER</h1>
 
-<input id="idAgent" placeholder="ID agent (prenom_nom)">
-<input id="code" type="password" placeholder="Code cadenas">
+<select id="agents"></select>
+<input id="code" placeholder="Code cadenas">
 
-<button class="btn" id="loginBtn">Entrer au registre</button>
+<button class="btn" id="login">Connexion</button>
 
-<p id="status"></p>
+<p><a href="register.html">Créer un agent</a></p>
 
 </div>
 </div>
 
 <script type="module">
-import { db, doc, getDoc } from "./firebase.js";
+import { db, collection, getDocs } from "./firebase.js";
 
-document.getElementById("loginBtn").addEventListener("click", async () => {
+const select = document.getElementById("agents");
 
-    const id = document.getElementById("idAgent").value;
-    const code = document.getElementById("code").value;
+// charger agents
+const snap = await getDocs(collection(db, "agents"));
 
-    const ref = doc(db, "agents_blackwater", id);
-    const snap = await getDoc(ref);
-
-    if (!snap.exists()) {
-        document.getElementById("status").innerText = "Agent inconnu";
-        return;
-    }
-
-    if (snap.data().code !== code) {
-        document.getElementById("status").innerText = "Code incorrect";
-        return;
-    }
-
-    if (!snap.data().approuve) {
-        document.getElementById("status").innerText = "Pas encore validé";
-        return;
-    }
-
-    localStorage.setItem("agent", JSON.stringify(snap.data()));
-
-    window.location.href = "stock.html";
+snap.forEach(doc => {
+    const a = doc.data();
+    const opt = document.createElement("option");
+    opt.value = doc.id;
+    opt.textContent = a.prenom + " " + a.nom;
+    opt.dataset.code = a.code;
+    select.appendChild(opt);
 });
 
+document.getElementById("login").onclick = () => {
+
+    const selected = select.options[select.selectedIndex];
+    const code = document.getElementById("code").value;
+
+    if (code === selected.dataset.code) {
+
+        localStorage.setItem("agent", JSON.stringify({
+            id: selected.value,
+            name: selected.textContent
+        }));
+
+        window.location.href = "stock.html";
+    } else {
+        alert("Code incorrect");
+    }
+};
 </script>
 
 </body>
