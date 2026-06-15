@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Blackwater - Login</title>
+<title>Blackwater Login</title>
 <link rel="stylesheet" href="style.css">
 </head>
 
@@ -18,7 +18,7 @@
 <input id="regPrenom" placeholder="Prénom">
 <input id="regGrade" placeholder="Grade">
 <input id="regCode" placeholder="Code cadenas">
-<button id="btnRegister">Créer agent</button>
+<button id="btnRegister" class="btn">Créer agent</button>
 
 <hr>
 
@@ -26,7 +26,7 @@
 <input id="logNom" placeholder="Nom">
 <input id="logPrenom" placeholder="Prénom">
 <input id="logCode" placeholder="Code cadenas">
-<button id="btnLogin">Entrer</button>
+<button id="btnLogin" class="btn">Entrer</button>
 
 </div>
 </div>
@@ -42,9 +42,7 @@ document.getElementById("btnRegister").addEventListener("click", async () => {
     const grade = regGrade.value.trim();
     const code = regCode.value.trim();
 
-    if (!nom || !prenom || !code) {
-        return alert("Champs incomplets");
-    }
+    if (!nom || !prenom || !code) return alert("Champs incomplets");
 
     const id = `${prenom}_${nom}`;
 
@@ -58,7 +56,7 @@ document.getElementById("btnRegister").addEventListener("click", async () => {
     alert("Agent créé");
 });
 
-// LOGIN
+// CONNEXION
 document.getElementById("btnLogin").addEventListener("click", async () => {
 
     const nom = logNom.value.trim().toLowerCase();
@@ -66,6 +64,7 @@ document.getElementById("btnLogin").addEventListener("click", async () => {
     const code = logCode.value.trim();
 
     const id = `${prenom}_${nom}`;
+
     const ref = doc(db, "agents", id);
     const snap = await getDoc(ref);
 
