@@ -1,7 +1,130 @@
-<script>
-const agent = localStorage.getItem("agent");
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Stock</title>
+<link rel="stylesheet" href="style.css">
+</head>
 
-if (!agent) {
-    window.location.href = "login.html";
+<body>
+
+<div class="binder-container">
+<div class="old-paper-sheet">
+
+<h1>INVENTAIRE BLACKWATER</h1>
+
+<button onclick="logout()" class="btn btn-danger">Déconnexion</button>
+
+<h3 id="agentName"></h3>
+
+<input id="platNom" placeholder="Produit">
+<input id="platQty" type="number" placeholder="Quantité">
+<button id="add" class="btn">Ajouter</button>
+
+<input id="rplat" placeholder="Produit">
+<input id="rqty" type="number" placeholder="Quantité">
+<button id="remove" class="btn btn-danger">Retirer</button>
+
+<table class="inventory-table">
+<thead>
+<tr>
+<th>Produit</th>
+<th>Quantité</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody id="inv"></tbody>
+</table>
+
+</div>
+</div>
+
+<script type="module">
+import {
+db, doc, setDoc, getDoc, deleteDoc, collection, onSnapshot
+} from "./firebase.js";
+
+// sécurité
+const agent = JSON.parse(localStorage.getItem("agent"));
+
+if (!agent) window.location.href = "login.html";
+
+document.getElementById("agentName").innerText = agent.name;
+
+function logout(){
+localStorage.removeItem("agent");
+window.location.href = "login.html";
 }
+
+window.logout = logout;
+
+// AJOUT
+document.getElementById("add").onclick = async () => {
+
+const name = document.getElementById("platNom").value.toLowerCase();
+const qty = parseInt(document.getElementById("platQty").value);
+
+const ref = doc(db, "stock", name);
+const snap = await getDoc(ref);
+
+let total = qty;
+if (snap.exists()) total += snap.data().quantite;
+
+await setDoc(ref, {
+nom: name,
+quantite: total,
+action: "Ajout par " + agent.name
+});
+
+};
+
+// RETRAIT
+document.getElementById("remove").onclick = async () => {
+
+const name = document.getElementById("rplat").value.toLowerCase();
+const qty = parseInt(document.getElementById("rqty").value);
+
+const ref = doc(db, "stock", name);
+const snap = await getDoc(ref);
+
+if (!snap.exists()) return;
+
+let newQty = snap.data().quantite - qty;
+
+if (newQty <= 0) {
+await deleteDoc(ref);
+} else {
+await setDoc(ref, {
+nom: name,
+quantite: newQty,
+action: "Retrait par " + agent.name
+});
+}
+
+};
+
+// LIVE TABLE
+onSnapshot(collection(db, "stock"), (snap) => {
+
+const tbody = document.getElementById("inv");
+tbody.innerHTML = "";
+
+snap.forEach(d => {
+
+const x = d.data();
+
+tbody.innerHTML += `
+<tr>
+<td>${x.nom}</td>
+<td>${x.quantite}</td>
+<td>${x.action}</td>
+</tr>
+`;
+
+});
+
+});
 </script>
+
+</body>
+</html>
