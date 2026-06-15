@@ -5,10 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Police de Blackwater - Registre des Stocks</title>
     <link rel="stylesheet" href="style.css">
-
-    <!-- CHARGEMENT DE FIREBASE AVANT LE SCRIPT (Liens complets officiels de Google) -->
-    <script src="https://gstatic.com"></script>
-    <script src="https://gstatic.com"></script>
 </head>
 <body>
 
@@ -91,11 +87,35 @@
     </div>
 </div>
 
-<!-- LE SCRIPT CLASSIQUE SANS MODULE -->
-<script src="app.js"></script>
+<!-- INJECTION DIRECTE DES CONFIGURATIONS SANS PASSER PAR DES IMPORTS SCRIPT EXTÉRIEURS -->
+<script type="module">
+  import { initializeApp } from "https://gstatic.com";
+  import { getFirestore, doc, setDoc, getDoc, updateDoc, deleteDoc, collection, onSnapshot } from "https://gstatic.com";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCTZFFQ1BbNS2AhY2My3FoxE3iMF2VrRso",
+    authDomain: "://firebaseapp.com",
+    projectId: "police-bw",
+    storageBucket: "police-bw.firebasestorage.app",
+    messagingSenderId: "606303723293",
+    appId: "1:606303723293:web:2df34f7a461d42d1580bf4",
+    measurementId: "G-20HRYJBSP0"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  // Rendre la base accessible par notre fichier app.js principal
+  window.dbInstance = db;
+  window.firestoreTools = { doc, setDoc, getDoc, updateDoc, deleteDoc, collection, onSnapshot };
+</script>
+
+<!-- Lancement de votre code logique -->
+<script src="app.js" defer></script>
 
 </body>
 </html>
+
 
 
 
