@@ -3,92 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Police de Blackwater - Registre des Stocks</title>
+    <title>Blackwater Police - Registre</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div class="binder-container">
-    <div class="padlock-seal">🔒 PROPRIÉTÉ DU SHÉRIF</div>
-
     <div class="old-paper-sheet">
+
         <header class="police-header">
             <h1>BLACKWATER POLICE DEPARTMENT</h1>
-            <h2>REGISTRE OFFICIEL DES SUBSISTANCES — ANNÉE 1900</h2>
-            <div class="stamps">CONFIDENTIEL</div>
+            <h2>REGISTRE OFFICIEL DES SUBSISTANCES</h2>
         </header>
 
+        <!-- AGENT -->
         <section class="form-section">
-            <h3>I. AUTHENTIFICATION DE L'OFFICIER</h3>
-            <div class="input-group row">
-                <input type="text" id="agentNom" placeholder="Nom de famille" required>
-                <input type="text" id="agentPrenom" placeholder="Prénom" required>
-            </div>
-            <div class="input-group row">
-                <input type="text" id="agentGrade" placeholder="Grade (ex: Adjoint, Sergent)" required>
-                <input type="password" id="agentCadena" placeholder="Code Cadenas Secret (4 chiffres)" maxlength="4" required>
-            </div>
-            <div style="text-align:right; margin-top:10px;">
-                <button type="button" class="btn" id="btnInscrireAgent" style="background:#4a3525;">
-                    [ S'inscrire au Registre ]
-                </button>
-            </div>
+            <h3>IDENTITÉ OFFICIER</h3>
+
+            <input type="text" id="agentNom" placeholder="Nom">
+            <input type="text" id="agentPrenom" placeholder="Prénom">
+            <input type="text" id="agentGrade" placeholder="Grade">
+            <input type="password" id="agentCadena" placeholder="Code cadenas (4 chiffres)">
         </section>
 
+        <!-- AJOUT -->
         <section class="form-section">
-            <h3>II. ENTRÉE DE MARCHANDISES (Ravitaillement)</h3>
-            <div class="input-group row">
-                <input type="text" id="platNom" placeholder="Nom du plat / ration">
-                <input type="number" id="platQuantite" placeholder="Quantité ajoutée" min="1">
-                <button type="button" class="btn" id="btnAjouter">Inscrire l'Arrivée</button>
-            </div>
+            <h3>AJOUT DE STOCK</h3>
+
+            <input type="text" id="platNom" placeholder="Nom du produit">
+            <input type="number" id="platQuantite" placeholder="Quantité">
+
+            <button id="btnAjouter">Ajouter au registre</button>
         </section>
 
+        <!-- RETRAIT -->
         <section class="form-section">
-            <h3>III. SORTIE DE STOCK (Rations Consommées)</h3>
-            <div class="input-group row">
-                <input type="text" id="retraitPlatNom" placeholder="Nom du plat à retirer">
-                <input type="number" id="retraitQuantite" placeholder="Quantité retirée" min="1">
-                <button type="button" class="btn btn-danger" id="btnRetirer">Inscrire le Retrait</button>
-            </div>
+            <h3>RETRAIT DE STOCK</h3>
+
+            <input type="text" id="retraitPlatNom" placeholder="Nom du produit">
+            <input type="number" id="retraitQuantite" placeholder="Quantité">
+
+            <button id="btnRetirer">Retirer du registre</button>
         </section>
 
+        <!-- INVENTAIRE -->
         <section class="form-section">
-            <h3>IV. INVENTAIRE ACTUEL DU CLASSEUR</h3>
-            <table class="inventory-table">
+            <h3>INVENTAIRE</h3>
+
+            <table border="1">
                 <thead>
                     <tr>
-                        <th>Plat / Aliment</th>
-                        <th>Quantité Restante</th>
-                        <th>Dernière Action Par</th>
+                        <th>Produit</th>
+                        <th>Quantité</th>
+                        <th>Dernière action</th>
                     </tr>
                 </thead>
                 <tbody id="inventoryBody"></tbody>
             </table>
         </section>
 
-        <section class="form-section">
-            <h3>V. REGISTRE DES OFFICIERS RECONNUS</h3>
-            <table class="inventory-table">
-                <thead>
-                    <tr>
-                        <th>Identité de l'Officier</th>
-                        <th>Grade</th>
-                        <th>Statut du Cadenas</th>
-                        <th>Décision du Shérif / Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="agentsBody"></tbody>
-            </table>
-        </section>
     </div>
 </div>
 
-<!-- Firebase -->
+<!-- FIREBASE -->
 <script type="module">
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-
 import {
     getFirestore,
     doc,
@@ -101,18 +80,18 @@ import {
 } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
 const firebaseConfig = {
-    apiKey: "AIzaSyCTZFFQ1BbNS2AhY2My3FoxE3iMF2VrRso",
+    apiKey: "TON_API_KEY",
     authDomain: "police-bw.firebaseapp.com",
     projectId: "police-bw",
-    storageBucket: "police-bw.firebasestorage.app",
+    storageBucket: "police-bw.appspot.com",
     messagingSenderId: "606303723293",
-    appId: "1:606303723293:web:2df34f7a461d42d1580bf4",
-    measurementId: "G-20HRYJBSP0"
+    appId: "1:606303723293:web:2df34f7a461d42d1580bf4"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+// export global
 window.dbInstance = db;
 
 window.firestoreTools = {
@@ -124,13 +103,9 @@ window.firestoreTools = {
     collection,
     onSnapshot
 };
-
-console.log("Firebase chargé correctement");
-console.log(window.firestoreTools);
-
 </script>
 
-<!-- Ton code -->
+<!-- TON JS -->
 <script src="app.js" defer></script>
 
 </body>
