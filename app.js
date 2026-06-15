@@ -1,9 +1,7 @@
 window.addEventListener('DOMContentLoaded', () => {
 
-    // Vérification Firebase
     if (!window.dbInstance || !window.firestoreTools) {
-        console.error("Firebase non chargé.");
-        alert("Erreur : Firebase non chargé.");
+        console.error("Firebase non chargé");
         return;
     }
 
@@ -20,7 +18,7 @@ window.addEventListener('DOMContentLoaded', () => {
     } = window.firestoreTools;
 
     // =========================
-    // IDENTITÉ OFFICIER
+    // AGENT
     // =========================
     const getAgentData = () => {
         const nom = document.getElementById('agentNom').value.trim().toUpperCase();
@@ -28,10 +26,7 @@ window.addEventListener('DOMContentLoaded', () => {
         const grade = document.getElementById('agentGrade').value.trim();
         const code = document.getElementById('agentCadena').value.trim();
 
-        if (!nom || !prenom || !grade || !code) {
-            alert("Nom, prénom, grade et code obligatoires.");
-            return null;
-        }
+        if (!nom || !prenom || !grade || !code) return null;
 
         return {
             id: `${prenom.toLowerCase()}_${nom.toLowerCase()}`,
@@ -44,88 +39,68 @@ window.addEventListener('DOMContentLoaded', () => {
     };
 
     // =========================
-    // AJOUT PLATS
+    // AJOUT
     // =========================
     document.getElementById('btnAjouter').addEventListener('click', async () => {
 
         const agent = getAgentData();
         if (!agent) return;
 
-        const nomPlat = document.getElementById('platNom').value.trim().toLowerCase();
+        const nom = document.getElementById('platNom').value.trim().toLowerCase();
         const qty = parseInt(document.getElementById('platQuantite').value);
 
-        if (!nomPlat || isNaN(qty) || qty <= 0) {
-            alert("Données invalides.");
-            return;
-        }
+        if (!nom || isNaN(qty)) return;
 
-        const ref = doc(db, "inventaire_blackwater", nomPlat);
+        const ref = doc(db, "inventaire_blackwater", nom);
         const snap = await getDoc(ref);
 
         let total = qty;
-
-        if (snap.exists()) {
-            total += snap.data().quantite;
-        }
+        if (snap.exists()) total += snap.data().quantite;
 
         await setDoc(ref, {
-            nom: nomPlat,
+            nom,
             quantite: total,
             dernierAgent: agent.signature,
             derniereAction: "Ajout"
         });
 
-        document.getElementById('platNom').value = '';
-        document.getElementById('platQuantite').value = '';
     });
 
     // =========================
-    // RETRAIT + SUPPRESSION AUTO
+    // RETRAIT
     // =========================
     document.getElementById('btnRetirer').addEventListener('click', async () => {
 
         const agent = getAgentData();
         if (!agent) return;
 
-        const nomPlat = document.getElementById('retraitPlatNom').value.trim().toLowerCase();
+        const nom = document.getElementById('retraitPlatNom').value.trim().toLowerCase();
         const qty = parseInt(document.getElementById('retraitQuantite').value);
 
-        if (!nomPlat || isNaN(qty) || qty <= 0) {
-            alert("Données invalides.");
-            return;
-        }
+        if (!nom || isNaN(qty)) return;
 
-        const ref = doc(db, "inventaire_blackwater", nomPlat);
+        const ref = doc(db, "inventaire_blackwater", nom);
         const snap = await getDoc(ref);
 
-        if (!snap.exists()) {
-            alert("Ce plat n'existe pas.");
-            return;
-        }
+        if (!snap.exists()) return;
 
         let current = snap.data().quantite;
         let newQty = current - qty;
 
-        if (newQty < 0) {
-            alert("Pas assez de stock.");
-            return;
-        }
+        if (newQty < 0) return;
 
         if (newQty === 0) {
             await deleteDoc(ref);
-            alert("Stock épuisé, fiche supprimée.");
             return;
         }
 
         await setDoc(ref, {
-            nom: nomPlat,
+            nom,
             quantite: newQty,
             dernierAgent: agent.signature,
             derniereAction: `Retrait (-${qty})`
         });
 
-        document.getElementById('retraitPlatNom').value = '';
-        document.getElementById('retraitQuantite').value = '';
     });
 
     // =========================
@@ -136,14 +111,14 @@ window.addEventListener('DOMContentLoaded', () => {
         const tbody = document.getElementById('inventoryBody');
         tbody.innerHTML = '';
 
-        snapshot.forEach((docu) => {
-            const d = docu.data();
+        snapshot.forEach((d) => {
+            const data = d.data();
 
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td><strong>${d.nom}</strong></td>
-                <td>${d.quantite}</td>
-                <td>${d.dernierAgent} (${d.derniereAction})</td>
+                <td>${data.nom}</td>
+                <td>${data.quantite}</td>
+                <td>${data.dernierAgent} (${data.derniereAction})</td>
             `;
 
             tbody.appendChild(tr);
