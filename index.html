@@ -16,22 +16,59 @@
             <h2>REGISTRE OFFICIEL DES SUBSISTANCES</h2>
         </header>
 
-        <!-- AGENT -->
+        <!-- =========================
+             INSCRIPTION AGENT
+        ========================== -->
         <section class="form-section">
-            <h3>IDENTITÉ OFFICIER</h3>
+            <h3>ENREGISTREMENT OFFICIER</h3>
 
             <div class="row">
-                <input type="text" id="agentNom" placeholder="Nom">
-                <input type="text" id="agentPrenom" placeholder="Prénom">
+                <input type="text" id="newNom" placeholder="Nom">
+                <input type="text" id="newPrenom" placeholder="Prénom">
             </div>
 
             <div class="row">
-                <input type="text" id="agentGrade" placeholder="Grade">
-                <input type="password" id="agentCadena" placeholder="Code cadenas (4 chiffres)">
+                <input type="text" id="newGrade" placeholder="Grade">
+                <input type="password" id="newCode" placeholder="Code cadenas">
+                <button id="btnRegister" class="btn">Enregistrer agent</button>
             </div>
         </section>
 
-        <!-- AJOUT -->
+        <!-- =========================
+             CONNEXION AGENT
+        ========================== -->
+        <section class="form-section">
+            <h3>AUTHENTIFICATION OFFICIER</h3>
+
+            <div class="row">
+                <select id="agentSelect"></select>
+                <input type="password" id="loginCode" placeholder="Code cadenas">
+                <button id="btnLogin" class="btn">Connexion</button>
+            </div>
+
+            <p id="loginStatus"></p>
+        </section>
+
+        <!-- =========================
+             IDENTITÉ (ancien bloc gardé optionnel)
+        ========================== -->
+        <section class="form-section">
+            <h3>IDENTITÉ OFFICIER (lecture uniquement)</h3>
+
+            <div class="row">
+                <input type="text" id="agentNom" placeholder="Nom (auto)">
+                <input type="text" id="agentPrenom" placeholder="Prénom (auto)">
+            </div>
+
+            <div class="row">
+                <input type="text" id="agentGrade" placeholder="Grade (auto)">
+                <input type="password" id="agentCadena" placeholder="Code cadenas">
+            </div>
+        </section>
+
+        <!-- =========================
+             STOCK AJOUT
+        ========================== -->
         <section class="form-section">
             <h3>AJOUT DE STOCK</h3>
 
@@ -43,7 +80,9 @@
             <button id="btnAjouter" class="btn">Ajouter au registre</button>
         </section>
 
-        <!-- RETRAIT -->
+        <!-- =========================
+             STOCK RETRAIT
+        ========================== -->
         <section class="form-section">
             <h3>RETRAIT DE STOCK</h3>
 
@@ -55,7 +94,9 @@
             <button id="btnRetirer" class="btn btn-danger">Retirer du registre</button>
         </section>
 
-        <!-- INVENTAIRE -->
+        <!-- =========================
+             INVENTAIRE
+        ========================== -->
         <section class="form-section">
             <h3>INVENTAIRE</h3>
 
@@ -117,6 +158,5 @@ window.firestoreTools = {
 
 </body>
 </html>
-
 
 
