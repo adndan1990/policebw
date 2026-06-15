@@ -18,6 +18,16 @@ window.addEventListener('DOMContentLoaded', () => {
     } = window.firestoreTools;
 
     // =========================
+    // SESSION / SECURITE
+    // =========================
+    let failedAttempts = 0;
+    let sessionAgent = null;
+
+    function logTentative(agentId, status) {
+        console.log(`[LOG] ${agentId} -> ${status}`);
+    }
+
+    // =========================
     // AGENT DATA
     // =========================
     const getAgentData = () => {
@@ -39,23 +49,42 @@ window.addEventListener('DOMContentLoaded', () => {
     };
 
     // =========================
-    // VERIFICATION CADENA
+    // VERIFICATION AGENT
     // =========================
     async function verifierAgent(agent) {
+
+        if (failedAttempts >= 3) {
+            alert("ACCÈS BLOQUÉ (3 tentatives échouées). Contactez le Shérif.");
+            return false;
+        }
+
+        if (!agent || !agent.id || !agent.code) {
+            alert("Agent invalide.");
+            return false;
+        }
 
         const ref = doc(db, "agents_blackwater", agent.id);
         const snap = await getDoc(ref);
 
         if (!snap.exists()) {
-            alert("Agent non enregistré. Accès refusé.");
+            failedAttempts++;
+            logTentative(agent.id, "AGENT INCONNU");
+            alert("Agent non enregistré.");
             return false;
         }
 
-        if (snap.data().code !== agent.code) {
-            alert("Code cadenas incorrect. Accès refusé.");
+        const data = snap.data();
+
+        if (String(data.code).trim() !== String(agent.code).trim()) {
+            failedAttempts++;
+            logTentative(agent.id, "CODE INCORRECT");
+            alert(`Code incorrect (${failedAttempts}/3).`);
             return false;
         }
 
+        sessionAgent = agent;
+        failedAttempts = 0;
+        logTentative(agent.id, "ACCES AUTORISÉ");
         return true;
     }
 
@@ -147,11 +176,9 @@ window.addEventListener('DOMContentLoaded', () => {
 
             tbody.appendChild(tr);
         });
-
     });
 
 });
-
 
 
 
