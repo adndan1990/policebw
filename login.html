@@ -2,125 +2,80 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Blackwater - Auth</title>
+<title>Blackwater Police - Login</title>
 <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
 <div class="binder-container">
-<div class="old-paper-sheet">
 
-<h1>REGISTRE DES AGENTS</h1>
+    <div class="old-paper-sheet">
 
-<!-- SWITCH MODE -->
-<button onclick="toggleMode()" class="btn">Changer mode</button>
+        <h1>REGISTRE OFFICIEL</h1>
+        <h2>ACCÈS AGENT</h2>
 
-<!-- REGISTER -->
-<div id="registerBox">
+        <h3>INSCRIPTION</h3>
+        <input id="regNom" placeholder="Nom">
+        <input id="regPrenom" placeholder="Prénom">
+        <input id="regGrade" placeholder="Grade">
+        <input id="regCode" placeholder="Code cadenas">
+        <button id="btnRegister">Créer dossier agent</button>
 
-<h3>Créer un agent</h3>
+        <hr>
 
-<input id="r_nom" placeholder="Nom">
-<input id="r_prenom" placeholder="Prénom">
-<input id="r_grade" placeholder="Grade">
-<input id="r_code" placeholder="Code cadenas">
+        <h3>CONNEXION</h3>
+        <input id="logNom" placeholder="Nom">
+        <input id="logPrenom" placeholder="Prénom">
+        <input id="logCode" placeholder="Code cadenas">
+        <button id="btnLogin">Accéder au registre</button>
 
-<button id="registerBtn" class="btn">Créer</button>
+    </div>
 
-</div>
-
-<!-- LOGIN -->
-<div id="loginBox" style="display:none;">
-
-<h3>Connexion agent</h3>
-
-<select id="agentList"></select>
-<input id="login_code" placeholder="Code cadenas">
-
-<button id="loginBtn" class="btn">Connexion</button>
-
-</div>
-
-</div>
 </div>
 
 <script type="module">
-import {
-db, doc, setDoc, collection, getDocs
-} from "./firebase.js";
+import { db, doc, setDoc, getDoc } from "./firebase.js";
 
-/* SWITCH UI */
-window.toggleMode = () => {
-document.getElementById("registerBox").style.display =
-document.getElementById("registerBox").style.display === "none" ? "block" : "none";
+// INSCRIPTION
+document.getElementById("btnRegister").addEventListener("click", async () => {
+    const nom = regNom.value.trim().toLowerCase();
+    const prenom = regPrenom.value.trim().toLowerCase();
+    const grade = regGrade.value.trim();
+    const code = regCode.value.trim();
 
-document.getElementById("loginBox").style.display =
-document.getElementById("loginBox").style.display === "none" ? "block" : "none";
-};
+    const id = `${prenom}_${nom}`;
 
-/* CREATE AGENT */
-document.getElementById("registerBtn").onclick = async () => {
+    await setDoc(doc(db, "agents", id), {
+        nom, prenom, grade, code
+    });
 
-const nom = document.getElementById("r_nom").value;
-const prenom = document.getElementById("r_prenom").value;
-const grade = document.getElementById("r_grade").value;
-const code = document.getElementById("r_code").value;
-
-const id = prenom.toLowerCase() + "_" + nom.toLowerCase();
-
-await setDoc(doc(db, "agents", id), {
-nom, prenom, grade, code
+    alert("Agent enregistré");
 });
 
-alert("Agent créé");
-loadAgents();
-};
+// CONNEXION
+document.getElementById("btnLogin").addEventListener("click", async () => {
+    const nom = logNom.value.trim().toLowerCase();
+    const prenom = logPrenom.value.trim().toLowerCase();
+    const code = logCode.value.trim();
 
-/* LOAD AGENTS */
-async function loadAgents() {
+    const id = `${prenom}_${nom}`;
+    const ref = doc(db, "agents", id);
+    const snap = await getDoc(ref);
 
-const snap = await getDocs(collection(db, "agents"));
-const list = document.getElementById("agentList");
+    if (!snap.exists()) {
+        alert("Agent inconnu");
+        return;
+    }
 
-list.innerHTML = "";
+    if (snap.data().code !== code) {
+        alert("Code incorrect");
+        return;
+    }
 
-snap.forEach(d => {
-const a = d.data();
+    localStorage.setItem("agent", JSON.stringify(snap.data()));
 
-const opt = document.createElement("option");
-opt.value = d.id;
-opt.textContent = a.prenom + " " + a.nom;
-opt.dataset.code = a.code;
-
-list.appendChild(opt);
+    window.location.href = "stock.html";
 });
-}
-
-/* LOGIN */
-document.getElementById("loginBtn").onclick = () => {
-
-const select = document.getElementById("agentList");
-const opt = select.options[select.selectedIndex];
-
-const code = document.getElementById("login_code").value;
-
-if (code === opt.dataset.code) {
-
-localStorage.setItem("agent", JSON.stringify({
-id: opt.value,
-name: opt.textContent
-}));
-
-window.location.href = "stock.html";
-
-} else {
-alert("Code incorrect");
-}
-
-};
-
-loadAgents();
 </script>
 
 </body>
