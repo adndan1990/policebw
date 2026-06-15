@@ -1,15 +1,28 @@
-// On attend que la page internet et l'injection Firebase soient prêtes
+// On attend que la page soit chargée
 window.addEventListener('DOMContentLoaded', () => {
-    
-    // Récupération des outils injectés par index.html
-    const db = window.dbInstance;
-    const { doc, setDoc, getDoc, updateDoc, deleteDoc, collection, onSnapshot } = window.firestoreTools;
 
-    if (!db) {
-        console.error("Le registre n'a pas pu se connecter aux archives secrètes.");
+    // Vérification Firebase
+    if (!window.dbInstance || !window.firestoreTools) {
+        console.error("Firebase non chargé (dbInstance ou firestoreTools manquant).");
+        alert("Erreur : Firebase n'est pas chargé correctement.");
         return;
     }
 
+    const db = window.dbInstance;
+
+    const {
+        doc,
+        setDoc,
+        getDoc,
+        updateDoc,
+        deleteDoc,
+        collection,
+        onSnapshot
+    } = window.firestoreTools;
+
+    // =========================
+    // Récupération agent
+    // =========================
     const getAgentData = () => {
         const nom = document.getElementById('agentNom').value.trim().toUpperCase();
         const prenom = document.getElementById('agentPrenom').value.trim();
@@ -20,26 +33,30 @@ window.addEventListener('DOMContentLoaded', () => {
             alert("Halte ! Vous devez remplir tous les champs de l'officier.");
             return null;
         }
-        
+
         const agentId = `${prenom.toLowerCase()}_${nom.toLowerCase()}`;
-        return { 
+
+        return {
             id: agentId,
-            signature: `${grade} ${prenom} ${nom}`, 
+            signature: `${grade} ${prenom} ${nom}`,
             code: cadena,
-            grade: grade,
-            nom: nom,
-            prenom: prenom
+            grade,
+            nom,
+            prenom
         };
     };
 
+    // =========================
+    // Vérification agent
+    // =========================
     async function EnregistrerOuVerifierAgent(agent) {
         const agentRef = doc(db, "agents_blackwater", agent.id);
         const agentSnap = await getDoc(agentRef);
 
         if (agentSnap.exists()) {
             if (agentSnap.data().code !== agent.code) {
-                alert("Accès refusé ! Le code de cadenas ne correspond pas à cet officier.");
-                return { valide: false, approuve: false };
+                alert("Accès refusé ! Code incorrect.");
+                return { valide: false };
             }
             return { valide: true, approuve: agentSnap.data().approuve };
         } else {
@@ -50,12 +67,15 @@ window.addEventListener('DOMContentLoaded', () => {
                 code: agent.code,
                 approuve: false
             });
-            alert(`Nouvel officier ajouté en attente de validation.`);
+
+            alert("Nouvel officier enregistré.");
             return { valide: true, approuve: false };
         }
     }
 
-    // BOUTON : INSCRIPTION MANUELLE DE L'AGENT
+    // =========================
+    // Inscription agent
+    // =========================
     document.getElementById('btnInscrireAgent').addEventListener('click', async () => {
         const agent = getAgentData();
         if (!agent) return;
@@ -64,7 +84,7 @@ window.addEventListener('DOMContentLoaded', () => {
         const agentSnap = await getDoc(agentRef);
 
         if (agentSnap.exists()) {
-            alert("Cet officier figure déjà dans les archives du classeur !");
+            alert("Officier déjà enregistré.");
             return;
         }
 
@@ -76,11 +96,14 @@ window.addEventListener('DOMContentLoaded', () => {
             approuve: false
         });
 
-        alert(`Demande d'inscription déposée. Le Shérif doit maintenant tamponner votre ligne en bas de page.`);
+        alert("Demande envoyée au shérif.");
     });
 
-    // ACTION : ENTRÉE DE MARCHANDISES
+    // =========================
+    // AJOUT STOCK
+    // =========================
     document.getElementById('btnAjouter').addEventListener('click', async () => {
+
         const agent = getAgentData();
         if (!agent) return;
 
@@ -91,7 +114,7 @@ window.addEventListener('DOMContentLoaded', () => {
         const quantiteAjoutee = parseInt(document.getElementById('platQuantite').value);
 
         if (!nomPlat || isNaN(quantiteAjoutee) || quantiteAjoutee <= 0) {
-            alert("Veuillez renseigner un nom de plat valide et une quantité positive.");
+            alert("Données invalides.");
             return;
         }
 
@@ -112,29 +135,21 @@ window.addEventListener('DOMContentLoaded', () => {
 
         document.getElementById('platNom').value = '';
         document.getElementById('platQuantite').value = '';
-        alert(`Ravitaillement consigné avec succès.`);
     });
 
-    // ACTION : SORTIE DE MARCHANDISES
+    // =========================
+    // RETRAIT STOCK
+    // =========================
     document.getElementById('btnRetirer').addEventListener('click', async () => {
+
         const agent = getAgentData();
         if (!agent) return;
 
         const agentRef = doc(db, "agents_blackwater", agent.id);
         const agentSnap = await getDoc(agentRef);
 
-        if (!agentSnap.exists()) {
-            alert(`Retrait refusé ! L'officier n'est pas répertorié. Inscrivez-vous d'abord.`);
-            return;
-        }
-
-        if (agentSnap.data().code !== agent.code) {
-            alert("Alerte sabotage ! Code de cadenas incorrect.");
-            return;
-        }
-
-        if (!agentSnap.data().approuve) {
-            alert(`Accès Interdit ! Votre profil n'a pas encore été validé par le Shérif.`);
+        if (!agentSnap.exists() || agentSnap.data().code !== agent.code || !agentSnap.data().approuve) {
+            alert("Accès refusé.");
             return;
         }
 
@@ -142,7 +157,7 @@ window.addEventListener('DOMContentLoaded', () => {
         const quantiteRetiree = parseInt(document.getElementById('retraitQuantite').value);
 
         if (!nomPlat || isNaN(quantiteRetiree) || quantiteRetiree <= 0) {
-            alert("Veuillez renseigner un plat et une quantité à retirer.");
+            alert("Données invalides.");
             return;
         }
 
@@ -150,37 +165,39 @@ window.addEventListener('DOMContentLoaded', () => {
         const docSnap = await getDoc(docRef);
 
         if (!docSnap.exists()) {
-            alert("Ce plat n'est pas répertorié dans les stocks.");
+            alert("Introuvable.");
             return;
         }
 
-        let quantiteActuelle = docSnap.data().quantite;
-        if (quantiteRetiree > quantiteActuelle) {
-            alert(`Rations insuffisantes ! Il ne reste que ${quantiteActuelle} unité(s).`);
+        let current = docSnap.data().quantite;
+
+        if (quantiteRetiree > current) {
+            alert("Pas assez de stock.");
             return;
         }
 
         await setDoc(docRef, {
             nom: nomPlat,
-            quantite: quantiteActuelle - quantiteRetiree,
+            quantite: current - quantiteRetiree,
             dernierAgent: agent.signature,
             derniereAction: `Retrait (-${quantiteRetiree})`
         });
-
-        document.getElementById('retraitPlatNom').value = '';
-        document.getElementById('retraitQuantite').value = '';
-        alert("Le retrait a été validé.");
     });
 
-    // FLUX TEMPS RÉEL : TABLEAU DE L'INVENTAIRE
+    // =========================
+    // INVENTAIRE LIVE
+    // =========================
     onSnapshot(collection(db, "inventaire_blackwater"), (snapshot) => {
+
         const tbody = document.getElementById('inventoryBody');
-        tbody.innerHTML = ''; 
-        snapshot.forEach((doc) => {
-            const data = doc.data();
+        tbody.innerHTML = '';
+
+        snapshot.forEach((d) => {
+            const data = d.data();
+
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td style="text-transform: capitalize;"><strong>${data.nom}</strong></td>
+                <td><strong>${data.nom}</strong></td>
                 <td>${data.quantite}</td>
                 <td>${data.dernierAgent} (${data.derniereAction})</td>
             `;
@@ -188,59 +205,51 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // FLUX TEMPS RÉEL : REGISTRE ET ACTIONS DES AGENTS
+    // =========================
+    // AGENTS LIVE
+    // =========================
     onSnapshot(collection(db, "agents_blackwater"), (snapshot) => {
+
         const tbody = document.getElementById('agentsBody');
         tbody.innerHTML = '';
 
         snapshot.forEach((agentDoc) => {
+
             const agent = agentDoc.data();
+
             const tr = document.createElement('tr');
 
-            const statutHTML = agent.approuve 
-                ? `<span class="status-badge valide">✓ VALIDÉ</span>` 
-                : `<span class="status-badge attente">⚠ EN ATTENTE</span>`;
-
-            let actionsHTML = `<div class="action-buttons-cell">`;
-            if (!agent.approuve) {
-                actionsHTML += `<button class="btn-approve" data-id="${agentDoc.id}">[ VALIDER ]</button>`;
-            } else {
-                actionsHTML += `<i>Officier Actif</i> `;
-            }
-            actionsHTML += `<button class="btn-delete" data-id="${agentDoc.id}">[ RAYER ]</button>`;
-            actionsHTML += `</div>`;
-
             tr.innerHTML = `
-                <td><strong>${agent.prenom} ${agent.nom}</strong></td>
+                <td>${agent.prenom} ${agent.nom}</td>
                 <td>${agent.grade}</td>
-                <td>${statutHTML}</td>
-                <td>${actionsHTML}</td>
+                <td>${agent.approuve ? "VALIDÉ" : "EN ATTENTE"}</td>
+                <td>
+                    ${!agent.approuve ? `<button class="btn-approve" data-id="${agentDoc.id}">VALIDER</button>` : ""}
+                    <button class="btn-delete" data-id="${agentDoc.id}">RAYER</button>
+                </td>
             `;
+
             tbody.appendChild(tr);
         });
 
-        // Bouton Valider
-        document.querySelectorAll('.btn-approve').forEach(button => {
-            button.addEventListener('click', async (e) => {
-                const idAgentAValider = e.target.getAttribute('data-id');
-                const agentRef = doc(db, "agents_blackwater", idAgentAValider);
-                await updateDoc(agentRef, { approuve: true });
-                alert("Inscription officialisée !");
+        document.querySelectorAll('.btn-approve').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                const id = e.target.dataset.id;
+                await updateDoc(doc(db, "agents_blackwater", id), { approuve: true });
             });
         });
 
-        // Bouton Rayer / Supprimer
-        document.querySelectorAll('.btn-delete').forEach(button => {
-            button.addEventListener('click', async (e) => {
-                const idAgentASupprimer = e.target.getAttribute('data-id');
-                if (confirm("Rayer définitivement cet officier ?")) {
-                    const agentRef = doc(db, "agents_blackwater", idAgentASupprimer);
-                    await deleteDoc(agentRef);
-                    alert("L'agent a été retiré du registre.");
+        document.querySelectorAll('.btn-delete').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                const id = e.target.dataset.id;
+                if (confirm("Supprimer ?")) {
+                    await deleteDoc(doc(db, "agents_blackwater", id));
                 }
             });
         });
     });
+
+});
 });
 
 
