@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Police de Blackwater - Registre des Stocks</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="binder-container">
+    <!-- Cadenas Visuel -->
+    <div class="padlock-seal">🔒 PROPRIÉTÉ DU SHÉRIF</div>
+
+    <div class="old-paper-sheet">
+        <!-- En-tête Officiel 1900 -->
+        <header class="police-header">
+            <h1>BLACKWATER POLICE DEPARTMENT</h1>
+            <h2>REGISTRE OFFICIEL DES SUBSISTANCES — ANNÉE 1900</h2>
+            <div class="stamps">CONFIDENTIEL</div>
+        </header>
+
+        <!-- Section I : Authentification Agent -->
+        <section class="form-section">
+            <h3>I. AUTHENTIFICATION DE L'OFFICIER</h3>
+            <div class="input-group row">
+                <input type="text" id="agentNom" placeholder="Nom de famille" required>
+                <input type="text" id="agentPrenom" placeholder="Prénom" required>
+            </div>
+            <div class="input-group row">
+                <input type="text" id="agentGrade" placeholder="Grade (ex: Adjoint, Sergent)" required>
+                <input type="password" id="agentCadena" placeholder="Code Cadenas Secret (4 chiffres)" maxlength="4" required>
+            </div>
+            <div style="text-align: right; margin-top: 10px;">
+                <button type="button" class="btn" id="btnInscrireAgent" style="background: #4a3525;">[ S'inscrire au Registre ]</button>
+            </div>
+        </section>
+
+        <!-- Section II : Ajout de Nourriture -->
+        <section class="form-section">
+            <h3>II. ENTRÉE DE MARCHANDISES (Ravitaillement)</h3>
+            <div class="input-group row">
+                <input type="text" id="platNom" placeholder="Nom du plat / ration (ex: Haricots en conserve)">
+                <input type="number" id="platQuantite" placeholder="Quantité ajoutée" min="1">
+                <button type="button" class="btn" id="btnAjouter">Inscrire l'Arrivée</button>
+            </div>
+        </section>
+
+        <!-- Section III : Retrait de Nourriture -->
+        <section class="form-section">
+            <h3>III. SORTIE DE STOCK (Rations Consommées)</h3>
+            <div class="input-group row">
+                <input type="text" id="retraitPlatNom" placeholder="Nom du plat à retirer">
+                <input type="number" id="retraitQuantite" placeholder="Quantité retirée" min="1">
+                <button type="button" class="btn btn-danger" id="btnRetirer">Inscrire le Retrait</button>
+            </div>
+        </section>
+
+        <!-- Section IV : Visualisation de l'Inventaire Actuel -->
+        <section class="form-section">
+            <h3>IV. INVENTAIRE ACTUEL DU CLASSEUR</h3>
+            <table class="inventory-table">
+                <thead>
+                    <tr>
+                        <th>Plat / Aliment</th>
+                        <th>Quantité Restante</th>
+                        <th>Dernière Action Par</th>
+                    </tr>
+                </thead>
+                <tbody id="inventoryBody">
+                    <!-- Rempli par JavaScript -->
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Section V : Registre des Agents inscrits et validation -->
+        <section class="form-section">
+            <h3>V. REGISTRE DES OFFICIERS RECONNUS</h3>
+            <table class="inventory-table">
+                <thead>
+                    <tr>
+                        <th>Identité de l'Officier</th>
+                        <th>Grade</th>
+                        <th>Statut du Cadenas</th>
+                        <th>Décision du Shérif / Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="agentsBody">
+                    <!-- Rempli par JavaScript -->
+                </tbody>
+            </table>
+        </section>
+    </div>
+</div>
+
+<!-- Script Principal -->
+<script type="module" src="app.js"></script>
+
+</body>
+</html>
+
+
