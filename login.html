@@ -2,60 +2,125 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Login</title>
+<title>Blackwater - Auth</title>
 <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
+
 <div class="binder-container">
 <div class="old-paper-sheet">
 
-<h1>CONNEXION OFFICIER</h1>
+<h1>REGISTRE DES AGENTS</h1>
 
-<select id="agents"></select>
-<input id="code" placeholder="Code cadenas">
+<!-- SWITCH MODE -->
+<button onclick="toggleMode()" class="btn">Changer mode</button>
 
-<button class="btn" id="login">Connexion</button>
+<!-- REGISTER -->
+<div id="registerBox">
 
-<p><a href="register.html">Créer un agent</a></p>
+<h3>Créer un agent</h3>
+
+<input id="r_nom" placeholder="Nom">
+<input id="r_prenom" placeholder="Prénom">
+<input id="r_grade" placeholder="Grade">
+<input id="r_code" placeholder="Code cadenas">
+
+<button id="registerBtn" class="btn">Créer</button>
+
+</div>
+
+<!-- LOGIN -->
+<div id="loginBox" style="display:none;">
+
+<h3>Connexion agent</h3>
+
+<select id="agentList"></select>
+<input id="login_code" placeholder="Code cadenas">
+
+<button id="loginBtn" class="btn">Connexion</button>
+
+</div>
 
 </div>
 </div>
 
 <script type="module">
-import { db, collection, getDocs } from "./firebase.js";
+import {
+db, doc, setDoc, collection, getDocs
+} from "./firebase.js";
 
-const select = document.getElementById("agents");
+/* SWITCH UI */
+window.toggleMode = () => {
+document.getElementById("registerBox").style.display =
+document.getElementById("registerBox").style.display === "none" ? "block" : "none";
 
-// charger agents
-const snap = await getDocs(collection(db, "agents"));
+document.getElementById("loginBox").style.display =
+document.getElementById("loginBox").style.display === "none" ? "block" : "none";
+};
 
-snap.forEach(doc => {
-    const a = doc.data();
-    const opt = document.createElement("option");
-    opt.value = doc.id;
-    opt.textContent = a.prenom + " " + a.nom;
-    opt.dataset.code = a.code;
-    select.appendChild(opt);
+/* CREATE AGENT */
+document.getElementById("registerBtn").onclick = async () => {
+
+const nom = document.getElementById("r_nom").value;
+const prenom = document.getElementById("r_prenom").value;
+const grade = document.getElementById("r_grade").value;
+const code = document.getElementById("r_code").value;
+
+const id = prenom.toLowerCase() + "_" + nom.toLowerCase();
+
+await setDoc(doc(db, "agents", id), {
+nom, prenom, grade, code
 });
 
-document.getElementById("login").onclick = () => {
-
-    const selected = select.options[select.selectedIndex];
-    const code = document.getElementById("code").value;
-
-    if (code === selected.dataset.code) {
-
-        localStorage.setItem("agent", JSON.stringify({
-            id: selected.value,
-            name: selected.textContent
-        }));
-
-        window.location.href = "stock.html";
-    } else {
-        alert("Code incorrect");
-    }
+alert("Agent créé");
+loadAgents();
 };
+
+/* LOAD AGENTS */
+async function loadAgents() {
+
+const snap = await getDocs(collection(db, "agents"));
+const list = document.getElementById("agentList");
+
+list.innerHTML = "";
+
+snap.forEach(d => {
+const a = d.data();
+
+const opt = document.createElement("option");
+opt.value = d.id;
+opt.textContent = a.prenom + " " + a.nom;
+opt.dataset.code = a.code;
+
+list.appendChild(opt);
+});
+}
+
+/* LOGIN */
+document.getElementById("loginBtn").onclick = () => {
+
+const select = document.getElementById("agentList");
+const opt = select.options[select.selectedIndex];
+
+const code = document.getElementById("login_code").value;
+
+if (code === opt.dataset.code) {
+
+localStorage.setItem("agent", JSON.stringify({
+id: opt.value,
+name: opt.textContent
+}));
+
+window.location.href = "stock.html";
+
+} else {
+alert("Code incorrect");
+}
+
+};
+
+loadAgents();
 </script>
 
 </body>
