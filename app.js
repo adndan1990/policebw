@@ -17,86 +17,73 @@ window.addEventListener('DOMContentLoaded', () => {
     } = window.firestoreTools;
 
     // =========================
-    // AGENT CONNECTÉ (SESSION)
+    // SESSION / SECURITE
     // =========================
-    let agentActif = null;
+    let failedAttempts = 0;
+    let sessionAgent = null;
 
-    const agentSelect = document.getElementById("agentSelect");
-    const loginStatus = document.getElementById("loginStatus");
-
-    const codeInput = document.getElementById("agentCadena");
-
-    // =========================
-    // CHARGER LISTE AGENTS
-    // =========================
-    function chargerAgents() {
-        onSnapshot(collection(db, "agents_blackwater"), (snapshot) => {
-
-            agentSelect.innerHTML = `<option value="">-- Sélectionner un agent --</option>`;
-
-            snapshot.forEach((d) => {
-                const a = d.data();
-
-                const option = document.createElement("option");
-                option.value = d.id;
-                option.textContent = `${a.prenom} ${a.nom} (${a.grade})`;
-
-                agentSelect.appendChild(option);
-            });
-        });
+    function logTentative(agentId, status) {
+        console.log(`[LOG] ${agentId} -> ${status}`);
     }
 
-    chargerAgents();
+    // =========================
+    // AGENT DATA
+    // =========================
+    const getAgentData = () => {
+        const nom = document.getElementById('agentNom').value.trim().toUpperCase();
+        const prenom = document.getElementById('agentPrenom').value.trim();
+        const grade = document.getElementById('agentGrade').value.trim();
+        const code = document.getElementById('agentCadena').value.trim();
+
+        if (!nom || !prenom || !grade || !code) return null;
+
+        return {
+            id: `${prenom.toLowerCase()}_${nom.toLowerCase()}`,
+            nom,
+            prenom,
+            grade,
+            code,
+            signature: `${grade} ${prenom} ${nom}`
+        };
+    };
 
     // =========================
-    // LOGIN AGENT
+    // VERIFICATION AGENT
     // =========================
-    document.getElementById("btnLogin").addEventListener("click", async () => {
+    async function verifierAgent(agent) {
 
-        const agentId = agentSelect.value;
-        const code = codeInput.value.trim();
-
-        if (!agentId || !code) {
-            loginStatus.textContent = "Sélection + code requis.";
-            loginStatus.style.color = "red";
-            return;
+        if (failedAttempts >= 3) {
+            alert("ACCÈS BLOQUÉ (3 tentatives échouées). Contactez le Shérif.");
+            return false;
         }
 
-        const ref = doc(db, "agents_blackwater", agentId);
+        if (!agent || !agent.id || !agent.code) {
+            alert("Agent invalide.");
+            return false;
+        }
+
+        const ref = doc(db, "agents_blackwater", agent.id);
         const snap = await getDoc(ref);
 
         if (!snap.exists()) {
-            loginStatus.textContent = "Agent inconnu.";
-            loginStatus.style.color = "red";
-            return;
+            failedAttempts++;
+            logTentative(agent.id, "AGENT INCONNU");
+            alert("Agent non enregistré.");
+            return false;
         }
 
         const data = snap.data();
 
-        if (data.code !== code) {
-            loginStatus.textContent = "Code incorrect.";
-            loginStatus.style.color = "red";
-            return;
-        }
-
-        agentActif = {
-            id: agentId,
-            ...data,
-            signature: `${data.grade} ${data.prenom} ${data.nom}`
-        };
-
-        loginStatus.textContent = `Connecté : ${agentActif.signature}`;
-        loginStatus.style.color = "green";
-    });
-
-    // =========================
-    // CHECK LOGIN
-    // =========================
-    function requireLogin() {
-        if (!agentActif) {
-            alert("Vous devez être connecté en tant qu'agent.");
+        if (String(data.code).trim() !== String(agent.code).trim()) {
+            failedAttempts++;
+            logTentative(agent.id, "CODE INCORRECT");
+            alert(`Code incorrect (${failedAttempts}/3).`);
             return false;
         }
+
+        sessionAgent = agent;
+        failedAttempts = 0;
+        logTentative(agent.id, "ACCES AUTORISÉ");
         return true;
     }
 
@@ -105,7 +92,11 @@ window.addEventListener('DOMContentLoaded', () => {
     // =========================
     document.getElementById('btnAjouter').addEventListener('click', async () => {
 
-        if (!requireLogin()) return;
+        const agent = getAgentData();
+        if (!agent) return;
+
+        const ok = await verifierAgent(agent);
+        if (!ok) return;
 
         const nom = document.getElementById('platNom').value.trim().toLowerCase();
         const qty = parseInt(document.getElementById('platQuantite').value);
@@ -121,10 +112,9 @@ window.addEventListener('DOMContentLoaded', () => {
         await setDoc(ref, {
             nom,
             quantite: total,
-            dernierAgent: agentActif.signature,
+            dernierAgent: agent.signature,
             derniereAction: "Ajout"
         });
-
     });
 
     // =========================
@@ -132,7 +122,11 @@ window.addEventListener('DOMContentLoaded', () => {
     // =========================
     document.getElementById('btnRetirer').addEventListener('click', async () => {
 
-        if (!requireLogin()) return;
+        const agent = getAgentData();
+        if (!agent) return;
+
+        const ok = await verifierAgent(agent);
+        if (!ok) return;
 
         const nom = document.getElementById('retraitPlatNom').value.trim().toLowerCase();
         const qty = parseInt(document.getElementById('retraitQuantite').value);
@@ -151,20 +145,18 @@ window.addEventListener('DOMContentLoaded', () => {
 
         if (newQty === 0) {
             await deleteDoc(ref);
-            return;
+        } else {
+            await setDoc(ref, {
+                nom,
+                quantite: newQty,
+                dernierAgent: agent.signature,
+                derniereAction: `Retrait (-${qty})`
+            });
         }
-
-        await setDoc(ref, {
-            nom,
-            quantite: newQty,
-            dernierAgent: agentActif.signature,
-            derniereAction: `Retrait (-${qty})`
-        });
-
     });
 
     // =========================
-    // LIVE INVENTAIRE
+    // INVENTAIRE LIVE
     // =========================
     onSnapshot(collection(db, "inventaire_blackwater"), (snapshot) => {
 
@@ -183,9 +175,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
             tbody.appendChild(tr);
         });
-
     });
 
 });
-
 
