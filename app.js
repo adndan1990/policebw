@@ -83,15 +83,14 @@ window.addEventListener('DOMContentLoaded', () => {
 
         if (newQty === 0) {
             await deleteDoc(ref);
-            return;
+        } else {
+            await setDoc(ref, {
+                nom,
+                quantite: newQty,
+                dernierAgent: agent.signature,
+                derniereAction: `Retrait (-${qty})`
+            });
         }
-
-        await setDoc(ref, {
-            nom,
-            quantite: newQty,
-            dernierAgent: agent.signature,
-            derniereAction: `Retrait (-${qty})`
-        });
 
     });
 
@@ -113,6 +112,9 @@ window.addEventListener('DOMContentLoaded', () => {
             tbody.appendChild(tr);
         });
 
+    });
+
+});
 
 
 
