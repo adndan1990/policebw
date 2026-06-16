@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Login Blackwater</title>
+<title>Blackwater Police - Login</title>
 <link rel="stylesheet" href="style.css">
 </head>
 
@@ -11,24 +11,28 @@
 <div class="binder-container">
 <div class="old-paper-sheet">
 
-<h1>REGISTRE BLACKWATER</h1>
+<h1>REGISTRE OFFICIEL</h1>
 
 <!-- INSCRIPTION -->
-<h3>INSCRIPTION AGENT</h3>
+<h3>INSCRIPTION</h3>
+
 <input id="regNom" placeholder="Nom">
 <input id="regPrenom" placeholder="Prénom">
 <input id="regGrade" placeholder="Grade">
 <input id="regCode" placeholder="Code cadenas">
-<button id="btnRegister">Créer agent</button>
+
+<button id="btnRegister" class="btn">Créer agent</button>
 
 <hr>
 
 <!-- CONNEXION -->
 <h3>CONNEXION</h3>
+
 <input id="logNom" placeholder="Nom">
 <input id="logPrenom" placeholder="Prénom">
-<input id="logCode" placeholder="Code">
-<button id="btnLogin">Connexion</button>
+<input id="logCode" placeholder="Code cadenas">
+
+<button id="btnLogin" class="btn btn-danger">Entrer registre</button>
 
 </div>
 </div>
@@ -36,49 +40,69 @@
 <script type="module">
 import { db, doc, setDoc, getDoc } from "./firebase.js";
 
-// ================= REGISTER =================
+/* ================= ADMIN ================= */
+const ADMIN = {
+    nom: "moore",
+    prenom: "marley",
+    code: "7242"
+};
+
+/* ================= INSCRIPTION ================= */
 document.getElementById("btnRegister").addEventListener("click", async () => {
 
-  const nom = regNom.value.trim().toLowerCase();
-  const prenom = regPrenom.value.trim().toLowerCase();
-  const grade = regGrade.value.trim();
-  const code = regCode.value.trim();
+    const nom = regNom.value.trim().toLowerCase();
+    const prenom = regPrenom.value.trim().toLowerCase();
+    const grade = regGrade.value.trim();
+    const code = regCode.value.trim();
 
-  const isAdmin = prenom === "marley" && nom === "moore" && code === "7242";
+    if (!nom || !prenom || !code) return alert("Champs incomplets");
 
-  const id = `${prenom}_${nom}`;
+    const id = `${prenom}_${nom}`;
 
-  await setDoc(doc(db, "agents", id), {
-    nom,
-    prenom,
-    grade: isAdmin ? "Sheriff" : grade,
-    code,
-    role: isAdmin ? "admin" : "agent"
-  });
+    const isAdmin = nom === ADMIN.nom && prenom === ADMIN.prenom;
 
-  alert("Agent créé");
+    await setDoc(doc(db, "agents", id), {
+        nom,
+        prenom,
+        grade,
+        codeHash: code,
+        role: isAdmin ? "admin" : "agent",
+        approuve: isAdmin ? true : false
+    });
+
+    alert("Agent créé");
 });
 
-// ================= LOGIN =================
+/* ================= LOGIN ================= */
 document.getElementById("btnLogin").addEventListener("click", async () => {
 
-  const nom = logNom.value.trim().toLowerCase();
-  const prenom = logPrenom.value.trim().toLowerCase();
-  const code = logCode.value.trim();
+    const nom = logNom.value.trim().toLowerCase();
+    const prenom = logPrenom.value.trim().toLowerCase();
+    const code = logCode.value.trim();
 
-  const id = `${prenom}_${nom}`;
+    const id = `${prenom}_${nom}`;
 
-  const snap = await getDoc(doc(db, "agents", id));
+    const snap = await getDoc(doc(db, "agents", id));
 
-  if (!snap.exists()) return alert("Agent inconnu");
+    if (!snap.exists()) return alert("Agent inconnu");
 
-  const data = snap.data();
+    const data = snap.data();
 
-  if (data.code !== code) return alert("Code incorrect");
+    if (data.codeHash !== code) return alert("Code incorrect");
 
-  localStorage.setItem("agent", JSON.stringify(data));
+    if (!data.approuve) return alert("Agent non validé");
 
-  window.location.href = "stock.html";
+    /* ❌ ON NE STOCKE PAS LE CODE */
+    const safeAgent = {
+        nom: data.nom,
+        prenom: data.prenom,
+        grade: data.grade,
+        role: data.role
+    };
+
+    localStorage.setItem("agent", JSON.stringify(safeAgent));
+
+    window.location.href = "stock.html";
 });
 </script>
 
