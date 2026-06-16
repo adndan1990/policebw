@@ -36,7 +36,11 @@ import { db, doc, setDoc, getDoc } from "./firebase.js";
 
 // INSCRIPTION
 document.getElementById("btnRegister").addEventListener("click", async () => {
-
+    const ADMIN = {
+    nom: "moore",
+    prenom: "marley",
+    code: "7242"
+};
     const nom = regNom.value.trim().toLowerCase();
     const prenom = regPrenom.value.trim().toLowerCase();
     const grade = regGrade.value.trim();
