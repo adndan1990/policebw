@@ -1,195 +1,198 @@
 /* =========================
-   WESTERN POLICE STYLE
-   BLACKWATER REGISTRY
+   REALISTIC ARCHIVE STYLE
+   BLACKWATER POLICE DOSSIER
 ========================= */
 
 body {
     margin: 0;
-    padding: 50px 20px;
-    font-family: "Georgia", "Times New Roman", serif;
-    background: radial-gradient(circle at top, #3a2a1a, #120b07);
-    color: #2b1b10;
+    padding: 60px 20px;
+    font-family: "Times New Roman", Times, serif;
+    background: #1a1410;
+    color: #2a1f17;
 }
 
 /* =========================
-   CADRE BOIS / REGISTRE
+   DOSSIER CENTRAL (carton ancien)
 ========================= */
 
 .binder-container {
     max-width: 900px;
     margin: auto;
-    background: linear-gradient(145deg, #4a2f1b, #2a1a10);
-    padding: 25px;
-    border: 6px solid #1a0f09;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.8);
-    border-radius: 12px;
-    position: relative;
-}
-
-/* effet métal vieux sheriff */
-.binder-container::before {
-    content: "BLACKWATER COUNTY RECORDS";
-    position: absolute;
-    top: -18px;
-    left: 20px;
-    background: #1a0f09;
-    color: #c9a66b;
-    padding: 5px 15px;
-    font-size: 12px;
-    letter-spacing: 3px;
-    border: 1px solid #c9a66b;
+    background: #3b2a1d;
+    padding: 30px;
+    border: 1px solid #1c120c;
+    box-shadow:
+        inset 0 0 60px rgba(0,0,0,0.4),
+        0 25px 60px rgba(0,0,0,0.8);
 }
 
 /* =========================
-   FEUILLE VIEILLE
+   FEUILLE ARCHIVE RÉALISTE
 ========================= */
 
 .old-paper-sheet {
-    background: #f3e2c7;
+    background: #f1e6d0;
+    position: relative;
+    padding: 50px;
+    min-height: 750px;
+
+    /* texture papier réelle */
     background-image:
-        repeating-linear-gradient(
-            0deg,
-            rgba(0,0,0,0.08),
-            rgba(0,0,0,0.08) 1px,
-            transparent 1px,
-            transparent 28px
-        );
-    padding: 40px;
-    min-height: 700px;
-    border: 2px solid #b08a5a;
-    box-shadow: inset 0 0 40px rgba(0,0,0,0.2);
+        linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px),
+        radial-gradient(circle at 20% 30%, rgba(0,0,0,0.05), transparent 60%),
+        radial-gradient(circle at 80% 70%, rgba(0,0,0,0.04), transparent 70%);
+
+    background-size: 100% 26px, auto, auto;
+
+    border: 1px solid #c8b79a;
+
+    box-shadow:
+        inset 0 0 40px rgba(0,0,0,0.15),
+        0 5px 20px rgba(0,0,0,0.3);
+}
+
+/* effet papier ancien irrégulier */
+.old-paper-sheet::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: url("https://www.transparenttextures.com/patterns/aged-paper.png");
+    opacity: 0.18;
+    pointer-events: none;
 }
 
 /* =========================
-   TITRES STYLE SHERIFF
+   TITRE TYPE DOCUMENT OFFICIEL
 ========================= */
 
 h1 {
     text-align: center;
-    font-size: 2.5rem;
-    letter-spacing: 6px;
-    color: #2b1b10;
+    font-size: 28px;
+    letter-spacing: 4px;
     text-transform: uppercase;
-    border-bottom: 3px double #2b1b10;
-    padding-bottom: 10px;
+    color: #2a1f17;
+    border-bottom: 2px solid #3a2a1d;
+    padding-bottom: 12px;
+    margin-bottom: 20px;
 }
 
 h2, h3 {
-    letter-spacing: 2px;
+    font-size: 16px;
+    letter-spacing: 1px;
     text-transform: uppercase;
-    color: #3a2416;
+    color: #3a2a1d;
 }
 
 /* =========================
-   INPUT STYLE WESTERN
+   INPUT STYLE DOCUMENT ADMIN
 ========================= */
 
 input {
     width: 100%;
-    padding: 10px;
+    padding: 10px 6px;
     margin: 6px 0;
     border: none;
-    border-bottom: 2px solid #5a3a22;
+    border-bottom: 1px solid #5a4635;
     background: transparent;
-    font-family: "Georgia", serif;
-    font-size: 15px;
-    color: #2b1b10;
-    transition: 0.2s;
+    font-family: "Times New Roman", serif;
+    font-size: 14px;
+    color: #2a1f17;
 }
 
 input:focus {
     outline: none;
-    border-bottom: 2px solid #8b1f1f;
+    border-bottom: 2px solid #7a1f1f;
     background: rgba(255,255,255,0.2);
 }
 
 /* =========================
-   SELECT STYLE WANTED POSTER
+   SELECT ULTRA DISCRET
 ========================= */
 
 select {
     width: 100%;
-    padding: 10px;
+    padding: 10px 6px;
     margin: 6px 0;
-    border: 2px solid #5a3a22;
-    background: #f3e2c7;
-    font-family: "Georgia", serif;
-    font-size: 15px;
-    color: #2b1b10;
-    cursor: pointer;
+    border: none;
+    border-bottom: 1px solid #5a4635;
+    background: transparent;
+    font-family: "Times New Roman", serif;
+    font-size: 14px;
+    color: #2a1f17;
+    appearance: none;
 }
 
 select:focus {
-    border-color: #8b1f1f;
     outline: none;
+    border-bottom: 2px solid #7a1f1f;
 }
 
 /* =========================
-   BOUTONS SHERIFF
+   BOUTONS OFFICIELS
 ========================= */
 
 .btn {
-    background: #3a2416;
-    color: #f3e2c7;
-    padding: 10px 18px;
-    border: 2px solid #1a0f09;
-    cursor: pointer;
-    font-weight: bold;
+    background: #2f2219;
+    color: #f2e7d3;
+    border: 1px solid #1a120c;
+    padding: 10px 14px;
+    font-family: "Times New Roman", serif;
+    font-size: 13px;
     letter-spacing: 1px;
-    text-transform: uppercase;
-    transition: 0.2s;
+    cursor: pointer;
     margin-top: 8px;
 }
 
 .btn:hover {
-    background: #5a3a22;
-    transform: scale(1.02);
+    background: #3e2c20;
 }
 
 .btn-danger {
-    background: #7a1f1f;
+    background: #5a1f1f;
 }
 
 .btn-danger:hover {
-    background: #a52a2a;
+    background: #7a2a2a;
 }
 
 /* =========================
-   TABLE STYLE ARCHIVE
+   TABLE TYPE REGISTRE OFFICIEL
 ========================= */
 
 .inventory-table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 20px;
-    font-family: "Georgia", serif;
+    font-family: "Times New Roman", serif;
+    font-size: 14px;
 }
 
 .inventory-table th {
-    background: #3a2416;
-    color: #f3e2c7;
+    background: #2f2219;
+    color: #f2e7d3;
     padding: 10px;
+    text-align: left;
+    font-weight: normal;
     letter-spacing: 2px;
 }
 
 .inventory-table td {
-    border: 1px solid #5a3a22;
+    border-bottom: 1px solid #c8b79a;
     padding: 10px;
-    background: rgba(255,255,255,0.3);
 }
 
 /* =========================
-   ADMIN PANEL
+   PANEL ADMIN SOBRE
 ========================= */
 
 .admin-header {
     text-align: center;
-    font-size: 18px;
-    letter-spacing: 4px;
+    font-size: 14px;
+    letter-spacing: 3px;
     padding: 10px;
-    border: 2px solid #7a1f1f;
-    background: rgba(122,31,31,0.15);
+    border: 1px solid #5a1f1f;
     margin-bottom: 20px;
+    background: rgba(90,31,31,0.08);
 }
 
 /* =========================
@@ -197,37 +200,24 @@ select:focus {
 ========================= */
 
 .btn-approve {
-    background: #2d6a2d;
+    background: #2f5a2f;
     color: #fff;
-    border: 2px solid #1a0f09;
+    border: 1px solid #1a120c;
 }
 
 .btn-approve:hover {
-    background: #3fa03f;
+    background: #3f7a3f;
 }
 
 /* =========================
-   BADGE SHERIFF
-========================= */
-
-.admin-badge {
-    display: inline-block;
-    background: #7a1f1f;
-    color: #fff;
-    padding: 4px 10px;
-    font-size: 11px;
-    letter-spacing: 2px;
-}
-
-/* =========================
-   EFFET VIEUX DOCUMENT
+   EFFET DOCUMENT VRAI
 ========================= */
 
 .old-paper-sheet::after {
     content: "";
     position: absolute;
     inset: 0;
-    background: url("https://www.transparenttextures.com/patterns/old-mathematics.png");
-    opacity: 0.15;
+    background: radial-gradient(circle, transparent 60%, rgba(0,0,0,0.25));
+    opacity: 0.2;
     pointer-events: none;
 }
