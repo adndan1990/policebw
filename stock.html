@@ -62,7 +62,8 @@ import {
     getDoc,
     deleteDoc,
     collection,
-    onSnapshot
+    onSnapshot,
+    addDoc
 } from "./firebase.js";
 
 /* ================= SESSION ================= */
@@ -153,6 +154,15 @@ document.getElementById("btnAjouter").addEventListener("click", async () => {
         action: "Ajout"
     });
 
+    /* 🔥 LOG FIRESTORE */
+    await addDoc(collection(db, "logs_stock"), {
+        nom,
+        quantite: qty,
+        action: "Ajout",
+        agent: `${agent.prenom} ${agent.nom}`,
+        date: new Date().toISOString()
+    });
+
     platNom.value = "";
     platQuantite.value = "";
 });
@@ -186,6 +196,15 @@ document.getElementById("btnRetirer").addEventListener("click", async () => {
             action: `Retrait (-${qty})`
         });
     }
+
+    /* 🔥 LOG FIRESTORE */
+    await addDoc(collection(db, "logs_stock"), {
+        nom,
+        quantite: qty,
+        action: "Retrait",
+        agent: `${agent.prenom} ${agent.nom}`,
+        date: new Date().toISOString()
+    });
 
     retraitPlatNom.value = "";
     retraitQuantite.value = "";
