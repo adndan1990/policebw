@@ -95,6 +95,18 @@ async function checkAccess() {
     return snap.exists() && snap.data().approuve === true;
 }
 
+/* ================= DATE FORMAT ================= */
+function nowDate() {
+    return new Date().toLocaleString("fr-FR", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit"
+    });
+}
+
 /* ================= ELEMENTS ================= */
 const platSelect = document.getElementById("platSelect");
 const retraitSelect = document.getElementById("retraitSelect");
@@ -137,9 +149,7 @@ document.getElementById("btnAjouter").addEventListener("click", async () => {
     const nom = (platSelect.value || platNom.value).trim().toLowerCase();
     const qty = parseInt(platQuantite.value);
 
-    if (!nom || isNaN(qty) || qty <= 0) {
-        return alert("Données invalides");
-    }
+    if (!nom || isNaN(qty) || qty <= 0) return;
 
     const ref = doc(db, "stock", nom);
     const snap = await getDoc(ref);
@@ -160,11 +170,12 @@ document.getElementById("btnAjouter").addEventListener("click", async () => {
         quantite: qty,
         action: "Ajout",
         agent: `${agent.prenom} ${agent.nom}`,
-        date: new Date().toISOString()
+        date: nowDate()
     });
 
     platNom.value = "";
     platQuantite.value = "";
+    platSelect.value = "";
 });
 
 /* ================= RETRAIT STOCK ================= */
@@ -175,9 +186,7 @@ document.getElementById("btnRetirer").addEventListener("click", async () => {
     const nom = (retraitSelect.value || retraitPlatNom.value).trim().toLowerCase();
     const qty = parseInt(retraitQuantite.value);
 
-    if (!nom || isNaN(qty) || qty <= 0) {
-        return alert("Données invalides");
-    }
+    if (!nom || isNaN(qty) || qty <= 0) return;
 
     const ref = doc(db, "stock", nom);
     const snap = await getDoc(ref);
@@ -203,13 +212,16 @@ document.getElementById("btnRetirer").addEventListener("click", async () => {
         quantite: qty,
         action: "Retrait",
         agent: `${agent.prenom} ${agent.nom}`,
-        date: new Date().toISOString()
+        date: nowDate()
     });
 
     retraitPlatNom.value = "";
     retraitQuantite.value = "";
 });
 </script>
+
+</body>
+</html>
 
 </body>
 </html>
