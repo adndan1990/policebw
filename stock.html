@@ -15,6 +15,13 @@
 
 <h3 id="agentInfo"></h3>
 
+<!-- 🔥 BOUTON ADMIN (VISIBLE SEULEMENT POUR MARLEY) -->
+<button id="btnAdmin" class="btn btn-approve" style="display:none;">
+    🏛 Accéder au panel Admin
+</button>
+
+<hr>
+
 <h3>AJOUT</h3>
 <input id="platNom" placeholder="Produit">
 <input id="platQuantite" type="number" placeholder="Quantité">
@@ -52,26 +59,53 @@ import {
     onSnapshot
 } from "./firebase.js";
 
+/* =========================
+   SESSION
+========================= */
 const agent = JSON.parse(localStorage.getItem("agent"));
 
-if (!agent) window.location.href = "login.html";
+if (!agent) {
+    window.location.href = "login.html";
+}
 
+/* affichage agent */
 document.getElementById("agentInfo").innerText =
 `${agent.grade} ${agent.prenom} ${agent.nom}`;
 
+/* =========================
+   BOUTON ADMIN (MARLEY MOORE)
+========================= */
+const btnAdmin = document.getElementById("btnAdmin");
+
+if (agent.role === "admin") {
+    btnAdmin.style.display = "inline-block";
+
+    btnAdmin.addEventListener("click", () => {
+        window.location.href = "admin.html";
+    });
+}
+
+/* =========================
+   VERIF ACCES (APPROBATION)
+========================= */
 async function checkAccess() {
     const ref = doc(db, "agents", `${agent.prenom}_${agent.nom}`);
     const snap = await getDoc(ref);
+
     return snap.exists() && snap.data().approuve === true;
 }
 
-/* AJOUT */
+/* =========================
+   AJOUT STOCK
+========================= */
 document.getElementById("btnAjouter").addEventListener("click", async () => {
 
     if (!await checkAccess()) return alert("Accès refusé");
 
     const nom = platNom.value.trim().toLowerCase();
     const qty = parseInt(platQuantite.value);
+
+    if (!nom || isNaN(qty)) return;
 
     const ref = doc(db, "stock", nom);
     const snap = await getDoc(ref);
@@ -85,15 +119,22 @@ document.getElementById("btnAjouter").addEventListener("click", async () => {
         last: `${agent.prenom} ${agent.nom}`,
         action: "Ajout"
     });
+
+    platNom.value = "";
+    platQuantite.value = "";
 });
 
-/* RETRAIT */
+/* =========================
+   RETRAIT STOCK
+========================= */
 document.getElementById("btnRetirer").addEventListener("click", async () => {
 
     if (!await checkAccess()) return alert("Accès refusé");
 
     const nom = retraitPlatNom.value.trim().toLowerCase();
     const qty = parseInt(retraitQuantite.value);
+
+    if (!nom || isNaN(qty)) return;
 
     const ref = doc(db, "stock", nom);
     const snap = await getDoc(ref);
@@ -112,9 +153,14 @@ document.getElementById("btnRetirer").addEventListener("click", async () => {
             action: `Retrait (-${qty})`
         });
     }
+
+    retraitPlatNom.value = "";
+    retraitQuantite.value = "";
 });
 
-/* LIVE */
+/* =========================
+   LIVE INVENTAIRE
+========================= */
 onSnapshot(collection(db, "stock"), (snap) => {
 
     const body = document.getElementById("inventoryBody");
