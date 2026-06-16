@@ -37,10 +37,45 @@
 </div>
 </div>
 
+<!-- ================= FIREBASE ================= -->
 <script type="module">
-import { db, doc, setDoc, getDoc } from "./firebase.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+import {
+    getFirestore,
+    doc,
+    setDoc,
+    getDoc
+} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
-/* ================= ADMIN ================= */
+/* FIREBASE CONFIG */
+const firebaseConfig = {
+    apiKey: "TON_API_KEY",
+    authDomain: "police-bw.firebaseapp.com",
+    projectId: "police-bw",
+    storageBucket: "police-bw.appspot.com",
+    messagingSenderId: "606303723293",
+    appId: "1:606303723293:web:2df34f7a461d42d1580bf4"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+/* EXPORT GLOBAL */
+window.db = db;
+window.doc = doc;
+window.setDoc = setDoc;
+window.getDoc = getDoc;
+</script>
+
+<!-- ================= LOGIQUE ================= -->
+<script type="module">
+
+const db = window.db;
+const doc = window.doc;
+const setDoc = window.setDoc;
+const getDoc = window.getDoc;
+
+/* ================= ADMIN MARLEY MOORE ================= */
 const ADMIN = {
     nom: "moore",
     prenom: "marley",
@@ -50,12 +85,14 @@ const ADMIN = {
 /* ================= INSCRIPTION ================= */
 document.getElementById("btnRegister").addEventListener("click", async () => {
 
-    const nom = regNom.value.trim().toLowerCase();
-    const prenom = regPrenom.value.trim().toLowerCase();
-    const grade = regGrade.value.trim();
-    const code = regCode.value.trim();
+    const nom = document.getElementById("regNom").value.trim().toLowerCase();
+    const prenom = document.getElementById("regPrenom").value.trim().toLowerCase();
+    const grade = document.getElementById("regGrade").value.trim();
+    const code = document.getElementById("regCode").value.trim();
 
-    if (!nom || !prenom || !code) return alert("Champs incomplets");
+    if (!nom || !prenom || !code) {
+        return alert("Champs incomplets");
+    }
 
     const id = `${prenom}_${nom}`;
 
@@ -70,29 +107,37 @@ document.getElementById("btnRegister").addEventListener("click", async () => {
         approuve: isAdmin ? true : false
     });
 
-    alert("Agent créé");
+    alert("Agent envoyé en attente de validation");
 });
 
-/* ================= LOGIN ================= */
+/* ================= CONNEXION ================= */
 document.getElementById("btnLogin").addEventListener("click", async () => {
 
-    const nom = logNom.value.trim().toLowerCase();
-    const prenom = logPrenom.value.trim().toLowerCase();
-    const code = logCode.value.trim();
+    const nom = document.getElementById("logNom").value.trim().toLowerCase();
+    const prenom = document.getElementById("logPrenom").value.trim().toLowerCase();
+    const code = document.getElementById("logCode").value.trim();
 
     const id = `${prenom}_${nom}`;
 
     const snap = await getDoc(doc(db, "agents", id));
 
-    if (!snap.exists()) return alert("Agent inconnu");
+    if (!snap.exists()) {
+        return alert("Agent inconnu");
+    }
 
     const data = snap.data();
 
-    if (data.codeHash !== code) return alert("Code incorrect");
+    /* 🔐 VERIF CODE */
+    if (data.codeHash !== code) {
+        return alert("Code incorrect");
+    }
 
-    if (!data.approuve) return alert("Agent non validé");
+    /* 🚫 BLOQUÉ SI NON APPROUVÉ */
+    if (!data.approuve) {
+        return alert("Agent en attente d'approbation admin");
+    }
 
-    /* ❌ ON NE STOCKE PAS LE CODE */
+    /* ❌ ON NE SAUVEGARDE PAS LE CODE */
     const safeAgent = {
         nom: data.nom,
         prenom: data.prenom,
