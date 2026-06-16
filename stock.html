@@ -15,25 +15,34 @@
 
 <h3 id="agentInfo"></h3>
 
-<!-- 🔥 BOUTON ADMIN (VISIBLE SEULEMENT POUR MARLEY) -->
+<!-- 🔥 ADMIN BUTTON (MARLEY ONLY) -->
 <button id="btnAdmin" class="btn btn-approve" style="display:none;">
     🏛 Accéder au panel Admin
 </button>
 
 <hr>
 
+<!-- ================= AJOUT ================= -->
 <h3>AJOUT</h3>
-<input id="platNom" placeholder="Produit">
+
+<select id="platSelect"></select>
+<input id="platNom" placeholder="Ou nouveau produit">
 <input id="platQuantite" type="number" placeholder="Quantité">
+
 <button id="btnAjouter" class="btn">Ajouter</button>
 
+<!-- ================= RETRAIT ================= -->
 <h3>RETRAIT</h3>
-<input id="retraitPlatNom" placeholder="Produit">
+
+<select id="retraitSelect"></select>
+<input id="retraitPlatNom" placeholder="Ou produit manuel">
 <input id="retraitQuantite" type="number" placeholder="Quantité">
+
 <button id="btnRetirer" class="btn btn-danger">Retirer</button>
 
 <hr>
 
+<!-- ================= TABLE ================= -->
 <table class="inventory-table">
 <thead>
 <tr>
@@ -68,12 +77,11 @@ if (!agent) {
     window.location.href = "login.html";
 }
 
-/* affichage agent */
 document.getElementById("agentInfo").innerText =
 `${agent.grade} ${agent.prenom} ${agent.nom}`;
 
 /* =========================
-   BOUTON ADMIN (MARLEY MOORE)
+   ADMIN BUTTON (MARLEY ONLY)
 ========================= */
 const btnAdmin = document.getElementById("btnAdmin");
 
@@ -86,7 +94,7 @@ if (agent.role === "admin") {
 }
 
 /* =========================
-   VERIF ACCES (APPROBATION)
+   CHECK APPROVAL
 ========================= */
 async function checkAccess() {
     const ref = doc(db, "agents", `${agent.prenom}_${agent.nom}`);
@@ -96,13 +104,45 @@ async function checkAccess() {
 }
 
 /* =========================
+   DROPDOWNS
+========================= */
+const platSelect = document.getElementById("platSelect");
+const retraitSelect = document.getElementById("retraitSelect");
+
+/* =========================
+   LIVE INVENTORY + DROPDOWN
+========================= */
+onSnapshot(collection(db, "stock"), (snap) => {
+
+    const body = document.getElementById("inventoryBody");
+    body.innerHTML = "";
+
+    platSelect.innerHTML = `<option value="">-- choisir produit --</option>`;
+    retraitSelect.innerHTML = `<option value="">-- choisir produit --</option>`;
+
+    snap.forEach(d => {
+        const data = d.data();
+
+        platSelect.innerHTML += `<option value="${data.nom}">${data.nom}</option>`;
+        retraitSelect.innerHTML += `<option value="${data.nom}">${data.nom}</option>`;
+
+        body.innerHTML += `
+        <tr>
+            <td>${data.nom}</td>
+            <td>${data.quantite}</td>
+            <td>${data.last || ""} ${data.action ? "(" + data.action + ")" : ""}</td>
+        </tr>`;
+    });
+});
+
+/* =========================
    AJOUT STOCK
 ========================= */
 document.getElementById("btnAjouter").addEventListener("click", async () => {
 
     if (!await checkAccess()) return alert("Accès refusé");
 
-    const nom = platNom.value.trim().toLowerCase();
+    const nom = (platSelect.value || platNom.value).trim().toLowerCase();
     const qty = parseInt(platQuantite.value);
 
     if (!nom || isNaN(qty)) return;
@@ -131,7 +171,7 @@ document.getElementById("btnRetirer").addEventListener("click", async () => {
 
     if (!await checkAccess()) return alert("Accès refusé");
 
-    const nom = retraitPlatNom.value.trim().toLowerCase();
+    const nom = (retraitSelect.value || retraitPlatNom.value).trim().toLowerCase();
     const qty = parseInt(retraitQuantite.value);
 
     if (!nom || isNaN(qty)) return;
@@ -157,27 +197,9 @@ document.getElementById("btnRetirer").addEventListener("click", async () => {
     retraitPlatNom.value = "";
     retraitQuantite.value = "";
 });
-
-/* =========================
-   LIVE INVENTAIRE
-========================= */
-onSnapshot(collection(db, "stock"), (snap) => {
-
-    const body = document.getElementById("inventoryBody");
-    body.innerHTML = "";
-
-    snap.forEach(d => {
-        const data = d.data();
-
-        body.innerHTML += `
-        <tr>
-            <td>${data.nom}</td>
-            <td>${data.quantite}</td>
-            <td>${data.last || ""} ${data.action ? "(" + data.action + ")" : ""}</td>
-        </tr>`;
-    });
-});
 </script>
 
+</body>
+</html>
 </body>
 </html>
