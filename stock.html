@@ -15,7 +15,6 @@
 
 <h3 id="agentInfo"></h3>
 
-<!-- ADMIN BUTTON -->
 <button id="btnAdmin" class="btn btn-approve" style="display:none;">
     🏛 Accéder au panel Admin
 </button>
@@ -69,29 +68,23 @@ import {
 /* ================= SESSION ================= */
 const agent = JSON.parse(localStorage.getItem("agent"));
 
-if (!agent) {
-    window.location.href = "login.html";
-}
+if (!agent) window.location.href = "login.html";
 
 document.getElementById("agentInfo").innerText =
 `${agent.grade} ${agent.prenom} ${agent.nom}`;
 
-/* ================= ADMIN BUTTON ================= */
+/* ================= ADMIN ================= */
 const btnAdmin = document.getElementById("btnAdmin");
 
 if (agent.role === "admin") {
     btnAdmin.style.display = "inline-block";
-
-    btnAdmin.addEventListener("click", () => {
-        window.location.href = "admin.html";
-    });
+    btnAdmin.onclick = () => window.location.href = "admin.html";
 }
 
-/* ================= ACCESS CHECK ================= */
+/* ================= ACCESS ================= */
 async function checkAccess() {
     const ref = doc(db, "agents", `${agent.prenom}_${agent.nom}`);
     const snap = await getDoc(ref);
-
     return snap.exists() && snap.data().approuve === true;
 }
 
@@ -110,13 +103,6 @@ function nowDate() {
 /* ================= ELEMENTS ================= */
 const platSelect = document.getElementById("platSelect");
 const retraitSelect = document.getElementById("retraitSelect");
-
-const platNom = document.getElementById("platNom");
-const platQuantite = document.getElementById("platQuantite");
-
-const retraitPlatNom = document.getElementById("retraitPlatNom");
-const retraitQuantite = document.getElementById("retraitQuantite");
-
 const body = document.getElementById("inventoryBody");
 
 /* ================= LIVE STOCK ================= */
@@ -124,22 +110,41 @@ onSnapshot(collection(db, "stock"), (snap) => {
 
     body.innerHTML = "";
 
-    platSelect.innerHTML = `<option value="">-- choisir produit --</option>`;
-    retraitSelect.innerHTML = `<option value="">-- choisir produit --</option>`;
+    // reset propre des select
+    platSelect.innerHTML = "";
+    retraitSelect.innerHTML = "";
+
+    const optionDefault = `<option value="">-- choisir produit --</option>`;
+    platSelect.innerHTML = optionDefault;
+    retraitSelect.innerHTML = optionDefault;
+
+    let hasData = false;
 
     snap.forEach(d => {
         const data = d.data();
+        if (!data.nom) return;
 
-        platSelect.innerHTML += `<option value="${data.nom}">${data.nom}</option>`;
-        retraitSelect.innerHTML += `<option value="${data.nom}">${data.nom}</option>`;
+        hasData = true;
+
+        const nom = data.nom;
+
+        platSelect.innerHTML += `<option value="${nom}">${nom}</option>`;
+        retraitSelect.innerHTML += `<option value="${nom}">${nom}</option>`;
 
         body.innerHTML += `
         <tr>
-            <td>${data.nom}</td>
-            <td>${data.quantite}</td>
-            <td>${data.last || ""} ${data.action ? "(" + data.action + ")" : ""}</td>
+            <td>${nom}</td>
+            <td>${data.quantite ?? 0}</td>
+            <td>${data.last ?? ""} ${data.action ? "(" + data.action + ")" : ""}</td>
         </tr>`;
     });
+
+    if (!hasData) {
+        body.innerHTML = `
+        <tr>
+            <td colspan="3">Aucun produit dans le stock</td>
+        </tr>`;
+    }
 });
 
 /* ================= AJOUT ================= */
@@ -148,7 +153,7 @@ document.getElementById("btnAjouter").addEventListener("click", async () => {
     if (!await checkAccess()) return alert("Accès refusé");
 
     const nom = (platSelect.value || platNom.value).trim().toLowerCase();
-    const qty = parseInt(platQuantite.value);
+    const qty = parseInt(document.getElementById("platQuantite").value);
 
     if (!nom || isNaN(qty) || qty <= 0) return;
 
@@ -174,8 +179,7 @@ document.getElementById("btnAjouter").addEventListener("click", async () => {
     });
 
     platNom.value = "";
-    platQuantite.value = "";
-    platSelect.value = "";
+    document.getElementById("platQuantite").value = "";
 });
 
 /* ================= RETRAIT ================= */
@@ -184,7 +188,7 @@ document.getElementById("btnRetirer").addEventListener("click", async () => {
     if (!await checkAccess()) return alert("Accès refusé");
 
     const nom = (retraitSelect.value || retraitPlatNom.value).trim().toLowerCase();
-    const qty = parseInt(retraitQuantite.value);
+    const qty = parseInt(document.getElementById("retraitQuantite").value);
 
     if (!nom || isNaN(qty) || qty <= 0) return;
 
@@ -215,8 +219,9 @@ document.getElementById("btnRetirer").addEventListener("click", async () => {
     });
 
     retraitPlatNom.value = "";
-    retraitQuantite.value = "";
+    document.getElementById("retraitQuantite").value = "";
 });
+
 </script>
 
 </body>
