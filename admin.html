@@ -1,45 +1,56 @@
-<h1>APPROBATION AGENTS</h1>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Blackwater Admin</title>
+<link rel="stylesheet" href="style.css">
+</head>
 
-<table>
-<thead>
-<tr>
-<th>Nom</th>
-<th>Prénom</th>
-<th>Grade</th>
-<th>Action</th>
-</tr>
-</thead>
+<body>
 
-<tbody id="list"></tbody>
-</table>
+<div class="binder-container">
+    <div class="old-paper-sheet">
+
+        <div class="admin-header">
+            🏛 BLACKWATER POLICE ADMIN PANEL
+        </div>
+
+        <h3>AGENTS EN ATTENTE D'APPROBATION</h3>
+
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Nom</th>
+                    <th>Prénom</th>
+                    <th>Grade</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody id="agentList"></tbody>
+        </table>
+
+    </div>
+</div>
 
 <script type="module">
-import {
-  db,
-  doc,
-  getDoc,
-  setDoc,
-  collection,
-  onSnapshot
-} from "./firebase.js";
+import { db, collection, onSnapshot, doc, updateDoc } from "./firebase.js";
 
-const admin = JSON.parse(localStorage.getItem("agent"));
+const list = document.getElementById("agentList");
 
-if (!admin || admin.role !== "admin") {
-    window.location.href = "login.html";
-}
-
-/* LISTE AGENTS EN ATTENTE */
+/* =========================
+   CHARGEMENT AGENTS
+========================= */
 onSnapshot(collection(db, "agents"), (snap) => {
 
-    const list = document.getElementById("list");
     list.innerHTML = "";
 
-    snap.forEach(d => {
+    snap.forEach((d) => {
         const a = d.data();
-        const id = d.id;
 
-        if (a.approuve) return;
+        if (a.approuve) return; // déjà validé
+
+        const id = d.id;
 
         list.innerHTML += `
             <tr>
@@ -47,19 +58,32 @@ onSnapshot(collection(db, "agents"), (snap) => {
                 <td>${a.prenom}</td>
                 <td>${a.grade}</td>
                 <td>
-                    <button onclick="approve('${id}')">APPROUVER</button>
+                    <button class="btn-approve" data-id="${id}">
+                        APPROUVER
+                    </button>
                 </td>
             </tr>
         `;
     });
 });
 
-/* APPROBATION */
-window.approve = async (id) => {
-    await setDoc(doc(db, "agents", id), {
-        approuve: true
-    }, { merge: true });
+/* =========================
+   APPROBATION
+========================= */
+document.addEventListener("click", async (e) => {
 
-    alert("Agent validé");
-};
+    if (e.target.classList.contains("btn-approve")) {
+
+        const id = e.target.dataset.id;
+
+        await updateDoc(doc(db, "agents", id), {
+            approuve: true
+        });
+
+        alert("Agent approuvé ✔");
+    }
+});
 </script>
+
+</body>
+</html>
