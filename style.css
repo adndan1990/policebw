@@ -13,7 +13,6 @@ body {
 
     font-family: "Caveat", cursive;
 
-    /* bois réaliste */
     background:
         linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)),
         repeating-linear-gradient(
@@ -27,13 +26,12 @@ body {
     display: flex;
     justify-content: center;
 
-    /* ❌ désactiver scroll */
     overflow: hidden;
     height: 100vh;
 }
 
 /* =========================
-   CADRE (REGISTRE SUR BUREAU)
+   CADRE
 ========================= */
 
 .binder-container {
@@ -46,7 +44,7 @@ body {
 }
 
 /* =========================
-   FEUILLE (CAHIER RÉALISTE)
+   FEUILLE
 ========================= */
 
 .old-paper-sheet {
@@ -74,7 +72,7 @@ body {
     transform: rotate(-0.2deg);
 }
 
-/* effet feuille légèrement pliée */
+/* effet feuille */
 .old-paper-sheet::after {
     content: "";
     position: absolute;
@@ -88,7 +86,40 @@ body {
 }
 
 /* =========================
-   TITRES STYLE OFFICIEL
+   ✍️ EFFET ENCRE + PLUME
+========================= */
+
+@keyframes inkAppear {
+    from {
+        opacity: 0;
+        transform: translateY(3px);
+        filter: blur(2px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+        filter: blur(0);
+    }
+}
+
+/* apparition type écriture */
+.old-paper-sheet p,
+.old-paper-sheet h1,
+.old-paper-sheet h2,
+.old-paper-sheet label,
+.old-paper-sheet td,
+.old-paper-sheet th {
+    animation: inkAppear 0.5s ease-out;
+}
+
+/* léger effet plume sur interaction */
+.old-paper-sheet input:focus {
+    transform: scale(1.01);
+    transition: 0.2s;
+}
+
+/* =========================
+   TITRES
 ========================= */
 
 h1 {
@@ -101,7 +132,7 @@ h1 {
 }
 
 /* =========================
-   INPUT STYLE CAHIER
+   INPUT STYLE
 ========================= */
 
 input, select {
@@ -124,13 +155,8 @@ input:focus, select:focus {
     background: rgba(255,255,255,0.2);
 }
 
-/* options */
-option {
-    background: #f7f1dd;
-}
-
 /* =========================
-   BOUTONS (STYLE OFFICIER)
+   BOUTONS
 ========================= */
 
 .btn {
@@ -161,7 +187,7 @@ option {
 }
 
 /* =========================
-   TABLE REGISTRE
+   TABLE
 ========================= */
 
 .inventory-table,
@@ -199,7 +225,7 @@ option {
 }
 
 /* =========================
-   BOUTON APPROBATION
+   APPROVE BUTTON
 ========================= */
 
 .btn-approve {
