@@ -1,5 +1,4 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-
 import {
   getFirestore,
   doc,
@@ -11,15 +10,8 @@ import {
   addDoc
 } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
-import {
-  getAuth,
-  signInWithEmailAndPassword,
-  onAuthStateChanged,
-  signOut
-} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-
 /* =========================
-   CONFIG FIREBASE
+   CONFIG
 ========================= */
 
 const firebaseConfig = {
@@ -32,32 +24,14 @@ const firebaseConfig = {
 };
 
 /* =========================
-   INIT APP
+   INIT
 ========================= */
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-const auth = getAuth(app);
 
 /* =========================
-   EXPORT PROPRE (SECURISÉ)
-========================= */
-
-export const firestoreDB = db;
-export const firebaseAuth = auth;
-
-/* =========================
-   AUTH HELPERS (IMPORTANT)
-========================= */
-
-export {
-  signInWithEmailAndPassword,
-  onAuthStateChanged,
-  signOut
-};
-
-/* =========================
-   FIRESTORE HELPERS
+   EXPORTS SIMPLES
 ========================= */
 
 export {
