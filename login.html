@@ -2,31 +2,31 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Blackwater Login</title>
+<title>Blackwater Police - Login</title>
 <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
 <div class="binder-container">
 <div class="old-paper-sheet">
 
-<h1>REGISTRE BLACKWATER</h1>
+<h1>REGISTRE OFFICIEL</h1>
+<h2>ACCÈS AGENT</h2>
 
-<h2>INSCRIPTION</h2>
+<h3>INSCRIPTION</h3>
 <input id="regNom" placeholder="Nom">
 <input id="regPrenom" placeholder="Prénom">
 <input id="regGrade" placeholder="Grade">
 <input id="regCode" placeholder="Code cadenas">
-<button id="btnRegister" class="btn">Créer agent</button>
+<button id="btnRegister">Créer agent</button>
 
 <hr>
 
-<h2>CONNEXION</h2>
+<h3>CONNEXION</h3>
 <input id="logNom" placeholder="Nom">
 <input id="logPrenom" placeholder="Prénom">
 <input id="logCode" placeholder="Code cadenas">
-<button id="btnLogin" class="btn">Entrer</button>
+<button id="btnLogin">Connexion</button>
 
 </div>
 </div>
@@ -34,33 +34,35 @@
 <script type="module">
 import { db, doc, setDoc, getDoc } from "./firebase.js";
 
-// INSCRIPTION
+// ================= REGISTER =================
 document.getElementById("btnRegister").addEventListener("click", async () => {
-    const ADMIN = {
-    nom: "moore",
-    prenom: "marley",
-    code: "7242"
-};
+
     const nom = regNom.value.trim().toLowerCase();
     const prenom = regPrenom.value.trim().toLowerCase();
     const grade = regGrade.value.trim();
     const code = regCode.value.trim();
 
-    if (!nom || !prenom || !code) return alert("Champs incomplets");
+    if (!nom || !prenom || !code) {
+        return alert("Champs incomplets");
+    }
+
+    const isAdmin =
+        prenom === "marley" && nom === "moore" && code === "7242";
 
     const id = `${prenom}_${nom}`;
 
     await setDoc(doc(db, "agents", id), {
         nom,
         prenom,
-        grade,
-        code
+        grade: isAdmin ? "Sheriff" : grade,
+        code,
+        role: isAdmin ? "admin" : "agent"
     });
 
-    alert("Agent créé");
+    alert("Agent enregistré");
 });
 
-// CONNEXION
+// ================= LOGIN =================
 document.getElementById("btnLogin").addEventListener("click", async () => {
 
     const nom = logNom.value.trim().toLowerCase();
@@ -69,14 +71,19 @@ document.getElementById("btnLogin").addEventListener("click", async () => {
 
     const id = `${prenom}_${nom}`;
 
-    const ref = doc(db, "agents", id);
-    const snap = await getDoc(ref);
+    const snap = await getDoc(doc(db, "agents", id));
 
-    if (!snap.exists()) return alert("Agent inconnu");
+    if (!snap.exists()) {
+        return alert("Agent inconnu");
+    }
 
-    if (snap.data().code !== code) return alert("Code incorrect");
+    const data = snap.data();
 
-    localStorage.setItem("agent", JSON.stringify(snap.data()));
+    if (data.code !== code) {
+        return alert("Code incorrect");
+    }
+
+    localStorage.setItem("agent", JSON.stringify(data));
 
     window.location.href = "stock.html";
 });
