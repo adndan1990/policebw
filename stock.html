@@ -15,7 +15,7 @@
 
 <h3 id="agentInfo"></h3>
 
-<!-- 🔥 ADMIN BUTTON (MARLEY ONLY) -->
+<!-- ADMIN BUTTON -->
 <button id="btnAdmin" class="btn btn-approve" style="display:none;">
     🏛 Accéder au panel Admin
 </button>
@@ -28,7 +28,6 @@
 <select id="platSelect"></select>
 <input id="platNom" placeholder="Ou nouveau produit">
 <input id="platQuantite" type="number" placeholder="Quantité">
-
 <button id="btnAjouter" class="btn">Ajouter</button>
 
 <!-- ================= RETRAIT ================= -->
@@ -37,12 +36,10 @@
 <select id="retraitSelect"></select>
 <input id="retraitPlatNom" placeholder="Ou produit manuel">
 <input id="retraitQuantite" type="number" placeholder="Quantité">
-
 <button id="btnRetirer" class="btn btn-danger">Retirer</button>
 
 <hr>
 
-<!-- ================= TABLE ================= -->
 <table class="inventory-table">
 <thead>
 <tr>
@@ -68,9 +65,7 @@ import {
     onSnapshot
 } from "./firebase.js";
 
-/* =========================
-   SESSION
-========================= */
+/* ================= SESSION ================= */
 const agent = JSON.parse(localStorage.getItem("agent"));
 
 if (!agent) {
@@ -80,9 +75,7 @@ if (!agent) {
 document.getElementById("agentInfo").innerText =
 `${agent.grade} ${agent.prenom} ${agent.nom}`;
 
-/* =========================
-   ADMIN BUTTON (MARLEY ONLY)
-========================= */
+/* ================= ADMIN BUTTON ================= */
 const btnAdmin = document.getElementById("btnAdmin");
 
 if (agent.role === "admin") {
@@ -93,9 +86,7 @@ if (agent.role === "admin") {
     });
 }
 
-/* =========================
-   CHECK APPROVAL
-========================= */
+/* ================= CHECK ACCES ================= */
 async function checkAccess() {
     const ref = doc(db, "agents", `${agent.prenom}_${agent.nom}`);
     const snap = await getDoc(ref);
@@ -103,15 +94,17 @@ async function checkAccess() {
     return snap.exists() && snap.data().approuve === true;
 }
 
-/* =========================
-   DROPDOWNS
-========================= */
+/* ================= ELEMENTS ================= */
 const platSelect = document.getElementById("platSelect");
 const retraitSelect = document.getElementById("retraitSelect");
 
-/* =========================
-   LIVE INVENTORY + DROPDOWN
-========================= */
+const platNom = document.getElementById("platNom");
+const platQuantite = document.getElementById("platQuantite");
+
+const retraitPlatNom = document.getElementById("retraitPlatNom");
+const retraitQuantite = document.getElementById("retraitQuantite");
+
+/* ================= LIVE STOCK ================= */
 onSnapshot(collection(db, "stock"), (snap) => {
 
     const body = document.getElementById("inventoryBody");
@@ -135,9 +128,7 @@ onSnapshot(collection(db, "stock"), (snap) => {
     });
 });
 
-/* =========================
-   AJOUT STOCK
-========================= */
+/* ================= AJOUT STOCK ================= */
 document.getElementById("btnAjouter").addEventListener("click", async () => {
 
     if (!await checkAccess()) return alert("Accès refusé");
@@ -145,7 +136,9 @@ document.getElementById("btnAjouter").addEventListener("click", async () => {
     const nom = (platSelect.value || platNom.value).trim().toLowerCase();
     const qty = parseInt(platQuantite.value);
 
-    if (!nom || isNaN(qty)) return;
+    if (!nom || isNaN(qty) || qty <= 0) {
+        return alert("Données invalides");
+    }
 
     const ref = doc(db, "stock", nom);
     const snap = await getDoc(ref);
@@ -164,9 +157,7 @@ document.getElementById("btnAjouter").addEventListener("click", async () => {
     platQuantite.value = "";
 });
 
-/* =========================
-   RETRAIT STOCK
-========================= */
+/* ================= RETRAIT STOCK ================= */
 document.getElementById("btnRetirer").addEventListener("click", async () => {
 
     if (!await checkAccess()) return alert("Accès refusé");
@@ -174,12 +165,14 @@ document.getElementById("btnRetirer").addEventListener("click", async () => {
     const nom = (retraitSelect.value || retraitPlatNom.value).trim().toLowerCase();
     const qty = parseInt(retraitQuantite.value);
 
-    if (!nom || isNaN(qty)) return;
+    if (!nom || isNaN(qty) || qty <= 0) {
+        return alert("Données invalides");
+    }
 
     const ref = doc(db, "stock", nom);
     const snap = await getDoc(ref);
 
-    if (!snap.exists()) return;
+    if (!snap.exists()) return alert("Produit inexistant");
 
     let newQty = snap.data().quantite - qty;
 
@@ -199,7 +192,5 @@ document.getElementById("btnRetirer").addEventListener("click", async () => {
 });
 </script>
 
-</body>
-</html>
 </body>
 </html>
