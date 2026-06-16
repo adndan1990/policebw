@@ -8,8 +8,19 @@ import {
   deleteDoc,
   collection,
   onSnapshot,
-  addDoc   // 👈 IMPORTANT
+  addDoc
 } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+  onAuthStateChanged,
+  signOut
+} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+
+/* =========================
+   CONFIG FIREBASE
+========================= */
 
 const firebaseConfig = {
   apiKey: "AIzaSyCTZFF1QBbNS2AhY2My3FoxE3iMF2VrRso",
@@ -20,12 +31,35 @@ const firebaseConfig = {
   appId: "1:606303723293:web:2df34f7a461d42d1580bf4"
 };
 
+/* =========================
+   INIT APP
+========================= */
+
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth(app);
+
+/* =========================
+   EXPORT PROPRE (SECURISÉ)
+========================= */
 
 export const firestoreDB = db;
+export const firebaseAuth = auth;
 
-// ✅ exports Firestore COMPLETS
+/* =========================
+   AUTH HELPERS (IMPORTANT)
+========================= */
+
+export {
+  signInWithEmailAndPassword,
+  onAuthStateChanged,
+  signOut
+};
+
+/* =========================
+   FIRESTORE HELPERS
+========================= */
+
 export {
   db,
   doc,
@@ -34,5 +68,5 @@ export {
   deleteDoc,
   collection,
   onSnapshot,
-  addDoc   // 👈 OBLIGATOIRE
+  addDoc
 };
