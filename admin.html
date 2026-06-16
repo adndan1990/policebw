@@ -9,80 +9,88 @@
 <body>
 
 <div class="binder-container">
-    <div class="old-paper-sheet">
+<div class="old-paper-sheet">
 
-        <div class="admin-header">
-            🏛 BLACKWATER POLICE ADMIN PANEL
-        </div>
+<h1>🏛 ADMIN PANEL BLACKWATER</h1>
 
-        <h3>AGENTS EN ATTENTE D'APPROBATION</h3>
+<h3>GESTION DES AGENTS</h3>
 
-        <table class="admin-table">
-            <thead>
-                <tr>
-                    <th>Nom</th>
-                    <th>Prénom</th>
-                    <th>Grade</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
+<table class="admin-table">
+<thead>
+<tr>
+<th>Nom</th>
+<th>Prénom</th>
+<th>Grade</th>
+<th>Statut</th>
+<th>Actions</th>
+</tr>
+</thead>
 
-            <tbody id="agentList"></tbody>
-        </table>
+<tbody id="agentList"></tbody>
+</table>
 
-    </div>
+</div>
 </div>
 
 <script type="module">
 import { db, collection, onSnapshot, doc, updateDoc } from "./firebase.js";
 
 /* =========================
-   🔒 PROTECTION ADMIN
+   SECURITE ADMIN
 ========================= */
 const agent = JSON.parse(localStorage.getItem("agent"));
 
 if (!agent || agent.role !== "admin") {
-    alert("Accès refusé - Admin uniquement");
+    alert("Accès refusé");
     window.location.href = "stock.html";
 }
 
-/* =========================
-   LISTE AGENTS
-========================= */
 const list = document.getElementById("agentList");
 
+/* =========================
+   LOAD AGENTS
+========================= */
 onSnapshot(collection(db, "agents"), (snap) => {
 
     list.innerHTML = "";
 
     snap.forEach((d) => {
         const a = d.data();
-
-        if (a.approuve) return; // déjà validé
-
         const id = d.id;
 
         list.innerHTML += `
-            <tr>
-                <td>${a.nom}</td>
-                <td>${a.prenom}</td>
-                <td>${a.grade}</td>
-                <td>
-                    <button class="btn-approve" data-id="${id}">
-                        APPROUVER
-                    </button>
-                </td>
-            </tr>
-        `;
+        <tr>
+            <td>${a.nom}</td>
+            <td>${a.prenom}</td>
+            <td>${a.grade}</td>
+            <td>
+                ${a.approuve ? "✔ Approuvé" : "⏳ En attente"}<br>
+                ${a.role === "admin" ? "👮 Admin" : "👤 Agent"}
+            </td>
+            <td>
+
+                <!-- APPROUVER -->
+                <button class="btn-approve" data-id="${id}">
+                    Approuver
+                </button>
+
+                <!-- PROMOUVOIR ADMIN -->
+                <button class="btn" data-admin="${id}">
+                    Donner Admin
+                </button>
+
+            </td>
+        </tr>`;
     });
 });
 
 /* =========================
-   APPROBATION
+   ACTIONS
 ========================= */
 document.addEventListener("click", async (e) => {
 
-    if (e.target.classList.contains("btn-approve")) {
+    /* APPROBATION AGENT */
+    if (e.target.dataset.id) {
 
         const id = e.target.dataset.id;
 
@@ -92,11 +100,21 @@ document.addEventListener("click", async (e) => {
 
         alert("Agent approuvé ✔");
     }
+
+    /* PROMOTION ADMIN */
+    if (e.target.dataset.admin) {
+
+        const id = e.target.dataset.admin;
+
+        await updateDoc(doc(db, "agents", id), {
+            role: "admin",
+            approuve: true
+        });
+
+        alert("Agent promu ADMIN 👮");
+    }
 });
 </script>
-
-</body>
-</html>
 
 </body>
 </html>
