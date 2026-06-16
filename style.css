@@ -1,11 +1,17 @@
 /* =========================
+   POLICE MANUSCRITE
+========================= */
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;600&display=swap');
+
+/* =========================
    FOND : BUREAU EN BOIS
 ========================= */
 
 body {
     margin: 0;
     padding: 40px 20px;
-    font-family: "Courier New", monospace;
+
+    font-family: "Caveat", cursive;
 
     /* bois réaliste */
     background:
@@ -20,6 +26,10 @@ body {
 
     display: flex;
     justify-content: center;
+
+    /* ❌ désactiver scroll */
+    overflow: hidden;
+    height: 100vh;
 }
 
 /* =========================
@@ -45,7 +55,6 @@ body {
     padding: 50px;
     min-height: 850px;
 
-    /* texture papier + grain */
     background-image:
         repeating-linear-gradient(
             0deg,
@@ -104,8 +113,8 @@ input, select {
     border: none;
     border-bottom: 1px solid #5a4330;
 
-    font-family: "Courier New", monospace;
-    font-size: 15px;
+    font-family: "Caveat", cursive;
+    font-size: 18px;
     color: #2a1c12;
 }
 
