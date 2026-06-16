@@ -1,5 +1,5 @@
 /* =========================
-   BASE (TOUS LES PAGES)
+   BASE (TOUTES PAGES)
 ========================= */
 
 body {
@@ -56,7 +56,7 @@ h2, h3 {
 }
 
 /* =========================
-   INPUT STYLE 1900
+   INPUT STYLE
 ========================= */
 
 input {
@@ -75,6 +75,35 @@ input:focus {
     outline: none;
     border-bottom: 2px solid #8a1f1f;
     background: rgba(255,255,255,0.3);
+}
+
+/* =========================
+   MENU DÉROULANT (SELECT) ⭐ AJOUTÉ
+========================= */
+
+select {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid #55412c;
+    font-family: "Courier New", Courier, monospace;
+    font-size: 1rem;
+    padding: 8px;
+    margin: 5px 0;
+    color: #1a120b;
+    cursor: pointer;
+}
+
+select:focus {
+    outline: none;
+    border-bottom: 2px solid #8a1f1f;
+    background: rgba(255,255,255,0.3);
+}
+
+option {
+    background: #f4ebd0;
+    color: #1a120b;
+    font-family: "Courier New", Courier, monospace;
 }
 
 /* =========================
@@ -126,7 +155,7 @@ input:focus {
 }
 
 /* =========================
-   ADMIN PANEL STYLE (IMPORTANT)
+   ADMIN PANEL
 ========================= */
 
 .admin-header {
@@ -156,7 +185,10 @@ input:focus {
     background: rgba(255,255,255,0.3);
 }
 
-/* Bouton admin approbation */
+/* =========================
+   BOUTON APPROBATION
+========================= */
+
 .btn-approve {
     background: #2b6e1a;
     color: white;
@@ -171,16 +203,6 @@ input:focus {
 }
 
 /* =========================
-   TEXTE IMMERSION
-========================= */
-
-.note {
-    font-size: 0.85rem;
-    opacity: 0.7;
-    margin-top: 10px;
-}
-
-/* =========================
    BADGE ADMIN
 ========================= */
 
@@ -190,6 +212,15 @@ input:focus {
     color: white;
     padding: 4px 10px;
     font-size: 0.75rem;
-    margin-bottom: 10px;
     letter-spacing: 2px;
+}
+
+/* =========================
+   TEXTE NOTE
+========================= */
+
+.note {
+    font-size: 0.85rem;
+    opacity: 0.7;
+    margin-top: 10px;
 }
