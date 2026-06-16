@@ -17,13 +17,13 @@
 
 <h3>AJOUT</h3>
 <input id="platNom" placeholder="Produit">
-<input id="platQuantite" type="number">
-<button id="btnAjouter">Ajouter</button>
+<input id="platQuantite" type="number" placeholder="Quantité">
+<button id="btnAjouter" class="btn">Ajouter</button>
 
 <h3>RETRAIT</h3>
 <input id="retraitPlatNom" placeholder="Produit">
-<input id="retraitQuantite" type="number">
-<button id="btnRetirer">Retirer</button>
+<input id="retraitQuantite" type="number" placeholder="Quantité">
+<button id="btnRetirer" class="btn btn-danger">Retirer</button>
 
 <hr>
 
@@ -32,7 +32,7 @@
 <tr>
 <th>Produit</th>
 <th>Quantité</th>
-<th>Action</th>
+<th>Dernière action</th>
 </tr>
 </thead>
 <tbody id="inventoryBody"></tbody>
@@ -43,16 +43,15 @@
 
 <script type="module">
 import {
-  db,
-  doc,
-  setDoc,
-  getDoc,
-  deleteDoc,
-  collection,
-  onSnapshot
+    db,
+    doc,
+    setDoc,
+    getDoc,
+    deleteDoc,
+    collection,
+    onSnapshot
 } from "./firebase.js";
 
-// ================= SESSION =================
 const agent = JSON.parse(localStorage.getItem("agent"));
 
 if (!agent) window.location.href = "login.html";
@@ -60,79 +59,77 @@ if (!agent) window.location.href = "login.html";
 document.getElementById("agentInfo").innerText =
 `${agent.grade} ${agent.prenom} ${agent.nom}`;
 
-// ================= CHECK =================
-async function checkAgent() {
-  const id = `${agent.prenom}_${agent.nom}`;
-  const snap = await getDoc(doc(db, "agents", id));
-  return snap.exists() && snap.data().code === agent.code;
+async function checkAccess() {
+    const ref = doc(db, "agents", `${agent.prenom}_${agent.nom}`);
+    const snap = await getDoc(ref);
+    return snap.exists() && snap.data().approuve === true;
 }
 
-// ================= AJOUT =================
+/* AJOUT */
 document.getElementById("btnAjouter").addEventListener("click", async () => {
 
-  if (!await checkAgent()) return alert("Code invalide");
+    if (!await checkAccess()) return alert("Accès refusé");
 
-  const nom = platNom.value.trim().toLowerCase();
-  const qty = parseInt(platQuantite.value);
+    const nom = platNom.value.trim().toLowerCase();
+    const qty = parseInt(platQuantite.value);
 
-  const ref = doc(db, "stock", nom);
-  const snap = await getDoc(ref);
+    const ref = doc(db, "stock", nom);
+    const snap = await getDoc(ref);
 
-  let total = qty;
-  if (snap.exists()) total += snap.data().quantite;
+    let total = qty;
+    if (snap.exists()) total += snap.data().quantite;
 
-  await setDoc(ref, {
-    nom,
-    quantite: total,
-    last: `${agent.prenom} ${agent.nom}`,
-    action: "Ajout"
-  });
+    await setDoc(ref, {
+        nom,
+        quantite: total,
+        last: `${agent.prenom} ${agent.nom}`,
+        action: "Ajout"
+    });
 });
 
-// ================= RETRAIT =================
+/* RETRAIT */
 document.getElementById("btnRetirer").addEventListener("click", async () => {
 
-  if (!await checkAgent()) return alert("Code invalide");
+    if (!await checkAccess()) return alert("Accès refusé");
 
-  const nom = retraitPlatNom.value.trim().toLowerCase();
-  const qty = parseInt(retraitQuantite.value);
+    const nom = retraitPlatNom.value.trim().toLowerCase();
+    const qty = parseInt(retraitQuantite.value);
 
-  const ref = doc(db, "stock", nom);
-  const snap = await getDoc(ref);
+    const ref = doc(db, "stock", nom);
+    const snap = await getDoc(ref);
 
-  if (!snap.exists()) return;
+    if (!snap.exists()) return;
 
-  let newQty = snap.data().quantite - qty;
+    let newQty = snap.data().quantite - qty;
 
-  if (newQty <= 0) {
-    await deleteDoc(ref);
-  } else {
-    await setDoc(ref, {
-      nom,
-      quantite: newQty,
-      last: `${agent.prenom} ${agent.nom}`,
-      action: `Retrait (-${qty})`
-    });
-  }
+    if (newQty <= 0) {
+        await deleteDoc(ref);
+    } else {
+        await setDoc(ref, {
+            nom,
+            quantite: newQty,
+            last: `${agent.prenom} ${agent.nom}`,
+            action: `Retrait (-${qty})`
+        });
+    }
 });
 
-// ================= LIVE =================
+/* LIVE */
 onSnapshot(collection(db, "stock"), (snap) => {
 
-  const body = document.getElementById("inventoryBody");
-  body.innerHTML = "";
+    const body = document.getElementById("inventoryBody");
+    body.innerHTML = "";
 
-  snap.forEach(d => {
-    const data = d.data();
+    snap.forEach(d => {
+        const data = d.data();
 
-    body.innerHTML += `
-      <tr>
-        <td>${data.nom}</td>
-        <td>${data.quantite}</td>
-        <td>${data.last} ${data.action}</td>
-      </tr>
-    `;
-  });
+        body.innerHTML += `
+        <tr>
+            <td>${data.nom}</td>
+            <td>${data.quantite}</td>
+            <td>${data.last || ""} ${data.action ? "(" + data.action + ")" : ""}</td>
+        </tr>`;
+    });
 });
 </script>
 
