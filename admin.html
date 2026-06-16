@@ -36,11 +36,21 @@
 <script type="module">
 import { db, collection, onSnapshot, doc, updateDoc } from "./firebase.js";
 
-const list = document.getElementById("agentList");
+/* =========================
+   🔒 PROTECTION ADMIN
+========================= */
+const agent = JSON.parse(localStorage.getItem("agent"));
+
+if (!agent || agent.role !== "admin") {
+    alert("Accès refusé - Admin uniquement");
+    window.location.href = "stock.html";
+}
 
 /* =========================
-   CHARGEMENT AGENTS
+   LISTE AGENTS
 ========================= */
+const list = document.getElementById("agentList");
+
 onSnapshot(collection(db, "agents"), (snap) => {
 
     list.innerHTML = "";
@@ -84,6 +94,9 @@ document.addEventListener("click", async (e) => {
     }
 });
 </script>
+
+</body>
+</html>
 
 </body>
 </html>
