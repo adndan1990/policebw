@@ -87,7 +87,7 @@ if (agent.role === "admin") {
     });
 }
 
-/* ================= CHECK ACCES ================= */
+/* ================= ACCESS CHECK ================= */
 async function checkAccess() {
     const ref = doc(db, "agents", `${agent.prenom}_${agent.nom}`);
     const snap = await getDoc(ref);
@@ -95,7 +95,7 @@ async function checkAccess() {
     return snap.exists() && snap.data().approuve === true;
 }
 
-/* ================= DATE FORMAT ================= */
+/* ================= DATE ================= */
 function nowDate() {
     return new Date().toLocaleString("fr-FR", {
         year: "numeric",
@@ -117,10 +117,11 @@ const platQuantite = document.getElementById("platQuantite");
 const retraitPlatNom = document.getElementById("retraitPlatNom");
 const retraitQuantite = document.getElementById("retraitQuantite");
 
+const body = document.getElementById("inventoryBody");
+
 /* ================= LIVE STOCK ================= */
 onSnapshot(collection(db, "stock"), (snap) => {
 
-    const body = document.getElementById("inventoryBody");
     body.innerHTML = "";
 
     platSelect.innerHTML = `<option value="">-- choisir produit --</option>`;
@@ -141,7 +142,7 @@ onSnapshot(collection(db, "stock"), (snap) => {
     });
 });
 
-/* ================= AJOUT STOCK ================= */
+/* ================= AJOUT ================= */
 document.getElementById("btnAjouter").addEventListener("click", async () => {
 
     if (!await checkAccess()) return alert("Accès refusé");
@@ -164,7 +165,6 @@ document.getElementById("btnAjouter").addEventListener("click", async () => {
         action: "Ajout"
     });
 
-    /* 🔥 LOG FIRESTORE */
     await addDoc(collection(db, "logs_stock"), {
         nom,
         quantite: qty,
@@ -178,7 +178,7 @@ document.getElementById("btnAjouter").addEventListener("click", async () => {
     platSelect.value = "";
 });
 
-/* ================= RETRAIT STOCK ================= */
+/* ================= RETRAIT ================= */
 document.getElementById("btnRetirer").addEventListener("click", async () => {
 
     if (!await checkAccess()) return alert("Accès refusé");
@@ -206,7 +206,6 @@ document.getElementById("btnRetirer").addEventListener("click", async () => {
         });
     }
 
-    /* 🔥 LOG FIRESTORE */
     await addDoc(collection(db, "logs_stock"), {
         nom,
         quantite: qty,
@@ -219,9 +218,6 @@ document.getElementById("btnRetirer").addEventListener("click", async () => {
     retraitQuantite.value = "";
 });
 </script>
-
-</body>
-</html>
 
 </body>
 </html>
